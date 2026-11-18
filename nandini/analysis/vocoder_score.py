@@ -5,8 +5,8 @@
 
 --align: the check before training (from `nandini vocoder align`). Passes if his BigVGAN's decodes of the
          training-style mels keep the words (Su-śrotā's mean character errors over the clips within VOCODER_CER_MARGIN
-         points of the real clips'; one character is about a point on a verse, so the margin applies to the mean, as
-         round 1 used it) and show his echo on every clip (above the echo rule's per-clip limit). That shows the mels
+         points of the real clips'; one character is about a point on a verse, so the margin applies to the
+         mean) and show his echo on every clip (above the echo rule's per-clip limit). That shows the mels
          match the audio and the pairs are what his vocoder expects.
 --decoded: the pass rule, on the same saved mels decoded by each vocoder (`nandini vocoder decode`). Per render: echo
          and shiver (the held note found on the vocos decode, measured at the same times in each) and character errors
@@ -85,7 +85,7 @@ def score_decoded(a):
              "| Vocoder | Echo, mean | Echo, highest | Shiver, mean | CER %, mean |", "|:--|--:|--:|--:|--:|"]
     lines += [f"| {k} | {g.loc[k, ('echo', 'mean')]:.4f} | {g.loc[k, ('echo', 'max')]:.4f} | "
               f"{g.loc[k, ('shiver', 'mean')]:.3f} | {g.loc[k, ('cer', 'mean')]:.2f} |" for k in dirs]
-    lines += ["", "*Complete table; per render in `scores.csv`.*", "",
+    lines += ["", "*Per render in `scores.csv`.*", "",
               f"1. Echo rule (mean ≤ {C.ECHO_MEAN_MAX}, every render ≤ {C.ECHO_EACH_MAX}): **{'met' if r1 else 'not met'}**.",
               f"2. Shiver below vocos's: change {sh[0]:+.3f} [{sh[1]:+.3f}, {sh[2]:+.3f}] (95% paired bootstrap): "
               f"**{'met' if r2 else 'not met'}**.",

@@ -145,10 +145,9 @@ def run(a):
              f"| ...and no line appears in the dataset | {(v.recognized & v.new).sum()} |",
              f"| ...and every character is in his vocab | {(v.recognized & v.new & v.in_vocab).sum()} |",
              f"| ...and the length is within the dataset's ({lo}-{hi} characters): passes | {v.passes.sum()} |", "",
-             "*Complete.*", "",
              "| Family | Dataset verses | Share of drawn families | Drawn | Available |", "|:--|--:|--:|--:|--:|"]
     lines += [f"| {k} | {fam[k]} | {fam[k] / fam.sum():.1%} | {q[k]} | {have[k]} |" for k in q.index]
-    lines += ["", f"*Complete. Dataset families with no recognised verse in the source, so not drawn: "
+    lines += ["", f"*Dataset families with no recognised verse in the source, so not drawn: "
               f"{', '.join(f'{k} ({(ds.family == k).sum()})' for k in left_out)}.*", "",
               f"Verses dropped as already in the dataset: {(v.recognized & ~v.new).sum()} (of the recognised).",
               f"Drawn verses, longest run of a half-verse's letters found in any dataset verse: median "

@@ -265,7 +265,7 @@ def report(a):
          f"{len(m)} target readings ({C.TARGET_SPEAKER}, Indic-Speak) against all {len(h):,} Vāgdhenu clips. "
          "Semitones re 100 Hz.", "",
          "## k", "", md(K, ".2f"), "",
-         f"*Complete table. Hz columns are the means converted back. Intervals: 95% bootstrap, {C.PITCH_BOOTSTRAP:,} "
+         f"*Hz columns are the means converted back. Intervals: 95% bootstrap, {C.PITCH_BOOTSTRAP:,} "
          "resamples, within meters (per style) or style x meter (pooled).*", "",
          "k per style as used: " + ", ".join(f"{s} {ks[s]:+.2f} st" for s in styles) + f" (`K_SEMITONES` in "
          f"`nandini/config.py`: {C.K_SEMITONES}).", "",
@@ -275,7 +275,7 @@ def report(a):
          f"{chk.cer.median():.1f}%, max {chk.cer.max():.1f}%.", "",
          "## Pitch tracking ranges", "",
          md(pd.DataFrame([{"Speaker": "Vāgdhenu", **rh}, {"Speaker": "target", **rm}]), ".1f"), "",
-         "*Complete table. Pass 2 range = 0.75 × Q1 to 1.5 × Q3 of pass 1's pooled voiced frames.*", "",
+         "*Pass 2 range = 0.75 × Q1 to 1.5 × Q3 of pass 1's pooled voiced frames.*", "",
          "## Vāgdhenu's mean by meter within style", "", md(by_meter(h, "clips"), ".2f"), "", "",
          "## The target's mean by meter within style", "", md(by_meter(m, "readings"), ".2f"), "", "",
          "## How high the shifted clips go", "",

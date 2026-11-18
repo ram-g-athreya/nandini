@@ -110,7 +110,7 @@ def score_web(a):
              "| Checkpoint | CER %, mean | Voice cosine to the training clips, mean |", "|:--|--:|--:|"]
     lines += [f"| {names.get(str(k), f'step {int(k):,}' if str(k).isdigit() else k)} | {r.cer:.2f} | {r.voice:.3f} |"
               for k, r in g.iterrows()]
-    lines += ["", "*Complete table.*", "",
+    lines += ["",
               f"Change {a.before:,} → {a.last:,}: CER {dc[0]:+.2f} points [{dc[1]:+.2f}, {dc[2]:+.2f}]; voice "
               f"{dv[0]:+.3f} [{dv[1]:+.3f}, {dv[2]:+.3f}] (95% paired bootstrap).", "",
               f"Limits: training verses; one seed per render; {len(v)} verses show a large trend, not a small one; "

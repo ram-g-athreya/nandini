@@ -10,7 +10,6 @@ Source: DCS (Oliver Hellwig, CC BY 4.0) at `8aeed5a1343d`, works: BhÄgavatapurÄ
 | ...and every character is in his vocab | 3918 |
 | ...and the length is within the dataset's (20-220 characters): passes | 3918 |
 
-*Complete.*
 
 | Family | Dataset verses | Share of drawn families | Drawn | Available |
 |:--|--:|--:|--:|--:|
@@ -21,7 +20,7 @@ Source: DCS (Oliver Hellwig, CC BY 4.0) at `8aeed5a1343d`, works: BhÄgavatapurÄ
 | 17-syllable | 41 | 3.9% | 2 | 5 |
 | sardulavikridita | 27 | 2.6% | 2 | 11 |
 
-*Complete. Dataset families with no recognised verse in the source, so not drawn: malini (73), other (197), rucira (53), sragdhara (92).*
+*Dataset families with no recognised verse in the source, so not drawn: malini (73), other (197), rucira (53), sragdhara (92).*
 
 Verses dropped as already in the dataset: 1 (of the recognised).
 Drawn verses, longest run of a half-verse's letters found in any dataset verse: median 18%, highest 37% (a shared word or two, not a shared line).

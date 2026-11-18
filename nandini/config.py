@@ -129,8 +129,8 @@ VOCODER_MIN_STEP = 10000  # no stop before this
 VOCODER_CAP = 30000  # a cost ceiling, not a target
 VOCODER_FLAT_OVER = 5000  # "levelled off": shiver unchanged against the checkpoint this many steps earlier
 VOCODER_VAL_CLIPS = 3  # NVIDIA's train.py needs a validation list; validation itself is skipped (--debug)
-ECHO_MEAN_MAX, ECHO_EACH_MAX = 0.02, 0.04  # round 1's echo rule (93.75 Hz frame-rate peak in the cepstrum)
-VOCODER_CER_MARGIN = 0.25  # new errors at most vocos's + this many points (round 1's margin)
+ECHO_MEAN_MAX, ECHO_EACH_MAX = 0.02, 0.04  # the echo rule (93.75 Hz frame-rate peak in the cepstrum)
+VOCODER_CER_MARGIN = 0.25  # new errors at most vocos's + this many points
 VOCODER_BOOT, VOCODER_BOOT_SEED = 10000, 20261109
 
 # Test verses for the evaluation (set B): verses outside the dataset, in its meters, from the Digital Corpus of Sanskrit
@@ -154,7 +154,7 @@ METER_FAMILY = {"anushtubh": "anustubh", "indravajra": "tristubh", "upendravajra
 COMPARE_MODELS = {"V": "voice_armA_ema_2026-06-11.pt", "Vs": "voice_steer_ema_2026-06-17.pt"}  # in VAGDHENU_WEIGHTS_REPO
 COMPARE_SETS = {"V": ("A", "B"), "Vs": ("A", "B", "C"), "N": ("A", "B")}
 WEB_SEED = 60  # his website's default seed
-# H4, registered in round 1 (2026-11-06), N against V on set B: mean CER within this many points of V's; mean melody
+# H4, fixed before any render was made, N against V on set B: mean CER within this many points of V's; mean melody
 # correlation with V's render at least this; mean duration ratio within 1 +- this.
 H4_CER_MARGIN, H4_MELODY_MIN, H4_DURATION_TOL = 2.0, 0.8, 0.10
 COMPARE_BOOT, COMPARE_BOOT_SEED = 10000, 20261109

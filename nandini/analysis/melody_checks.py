@@ -128,7 +128,6 @@ def timing(a):
          "runs late. Disagreement: share of frames where exactly one of the two is voiced, among frames where at least "
          "one is.", "", summ.to_markdown(index=False), "",
          pd.DataFrame({"Offset, ms": dist.index, "Conversions": dist.values}).to_markdown(index=False), "",
-         "*Complete tables.*", "",
          f"**Rule:** offset within {BAR_MS} ms in at least {int(BAR_SHARE * 100)}% of conversions → "
          f"{'**met**' if ok else '**not met**'} ({100 * within.mean():.1f}%).", "",
          "**Can the measure resolve offsets?** The best shift lowers disagreement by a median of "
@@ -219,7 +218,7 @@ def voicing(a):
     L = ["# Where the melody step imposes Vāgdhenu's voicing", "",
          "Per frame (WORLD harvest, as in the melody step): Vāgdhenu's voicing, which the melody step imposes, against "
          "the conversion's own. Percentages are of frames where either is voiced.", "",
-         summ.to_markdown(index=False), "", "*Complete table. Per conversion: `voicing.csv`.*", ""]
+         summ.to_markdown(index=False), "", "*Per conversion: `voicing.csv`.*", ""]
     (out / "voicing.md").write_text("\n".join(L))
     print("\n".join(L))
     if a.listen:
@@ -272,7 +271,7 @@ def loudness(a):
          "that gain, relative to the clip's median gain, on frames that come out audible (Vāgdhenu's energy within "
          f"{AUDIBLE_DB:.0f} dB of his loudest). Without a cap; the melody step caps boosts at "
          f"{C.ENERGY_MAX_BOOST_DB:g} dB.", "", summ.to_markdown(index=False), "",
-         "*Complete table. Per conversion: `loudness.csv`.*", ""]
+         "*Per conversion: `loudness.csv`.*", ""]
     (out / "loudness.md").write_text("\n".join(L))
     print("\n".join(L))
     if a.listen:
@@ -350,7 +349,7 @@ def loudness_cap(a):
          "own). Syllables wrong: right on Vāgdhenu's recording, wrong on the clip (Su-śrotā).", "",
          pd.DataFrame(t).to_markdown(index=False), "",
          f"Difference in syllables wrong, capped minus no cap: {diff:+.2f} points, 95% interval [{lo:+.2f}, {hi:+.2f}] "
-         f"(bootstrap over verses, {CAP_BOOT} resamples).", "", "*Complete table.*", "",
+         f"(bootstrap over verses, {CAP_BOOT} resamples).", "",
          f"1. Spikes gone (≤ 5% of capped clips more than 3 dB below −20 dBFS): {'met' if r1 else 'not met'} "
          f"({100 * (drop_cap > 3).mean():.1f}%).",
          f"2. Errors not worse (upper end ≤ +0.5 points): {'met' if r2 else 'not met'} ({hi:+.2f}).", ""]

@@ -411,12 +411,11 @@ nandini compare score                                                          #
 | Set | Verses | Systems | Compared against |
 |:--|:--|:--|:--|
 | A | the 61 pitch-shift verses (training verses) | N, V, Vs | Vāgdhenu's recording of each |
-| B | the 60 [test verses](#test-verses) | N, V, Vs | V's render (the registered test, below) |
+| B | the 60 [test verses](#test-verses) | N, V, Vs | V's render (the main test, below) |
 | C | his 6 demo verses (`docs/index.html`) | Vs | his demo MP3s: do we run his system as he does? |
 
-*Complete.*
 
-- **Registered test, set B (N against V):** mean character errors at most V's + 2.0 points; mean melody correlation
+- **Main test, set B (N against V), fixed before rendering:** mean character errors at most V's + 2.0 points; mean melody correlation
   with V's render at least 0.8; mean duration ratio within 1 ± 0.10.
 - **Melody correlation:** pitch curves (pYIN, 70–500 Hz) in semitones around each curve's own median, aligned by DTW
   on MFCCs, Pearson r over frames voiced in both.

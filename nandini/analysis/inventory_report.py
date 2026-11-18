@@ -68,7 +68,7 @@ def _by_style(s, s_all, out, n_conv, rescued, rng):
         cols[name] = c
     t = pd.DataFrame(cols).rename_axis("Measure").reset_index()
     L = ["## 7. By style", "", t.to_markdown(index=False, disable_numparse=True), "",
-         "*Complete table. 'Vāgdhenu's recording' is Su-śrotā's flag rate on its own chant, over every syllable of the text: "
+         "*'Vāgdhenu's recording' is Su-śrotā's flag rate on its own chant, over every syllable of the text: "
          "the judge's own error on the original. Only the two 'every syllable' rows count on the same basis and can be compared "
          "with it; every other row leaves out the syllables it flags on Vāgdhenu's recording. 'Average of "
          f"{n_conv} conversions': flagged syllables over all syllables, which equals the mean of the {n_conv} conversions' rates "
@@ -113,7 +113,7 @@ def _by_style(s, s_all, out, n_conv, rescued, rng):
         rows.append({"Scoring": "raw, every syllable (same basis as Vāgdhenu's recording)", f"{sts[1]} − {sts[0]}, points": f"{d0:+.2f}",
                      "95% interval": f"[{lo:+.2f}, {hi:+.2f}]"})
         L += [pd.DataFrame(rows).to_markdown(index=False, disable_numparse=True), "",
-              "*Complete table. Difference in flag rate (average of the conversions) between the styles; 95% bootstrap over clips within each style.*", ""]
+              "*Difference in flag rate (average of the conversions) between the styles; 95% bootstrap over clips within each style.*", ""]
     return L
 
 
@@ -141,7 +141,7 @@ def _best_whole(s, n_conv, rng, draws=200):
         rows.append(r)
     return ["## 8. Best whole conversion by number of conversions (raw)", "",
             pd.DataFrame(rows).to_markdown(index=False, disable_numparse=True), "",
-            f"*Complete table. Each clip keeps its conversion with the fewest raw flags among n. 'Verses with a flag-free "
+            f"*Each clip keeps its conversion with the fewest raw flags among n. 'Verses with a flag-free "
             "conversion': at least one of the n conversions has no syllable flagged (not counting syllables flagged on "
             f"Vāgdhenu's recording). Averaged over {draws} random "
             "sets of n of the conversions. Same judge picks and scores, so optimistic. Decision rule 1 is defined on section 5, per syllable.*", ""]
@@ -171,7 +171,7 @@ def _kept_before_after(s, s_all, n_conv, rng, draws=200, n_small=5):
         t = pd.DataFrame([{"Conversion kept per clip": r, "Converter output, % of syllables flagged": f"{a:.2f}",
                            "After the melody step, % of syllables flagged": f"{b:.2f}"} for r, (a, b) in rows])
         L += [f"**{name}**", "", t.to_markdown(index=False, disable_numparse=True), ""]
-    L += [f"*Complete tables. Syllables flagged by Su-śrotā in the conversion each clip keeps, leaving out the "
+    L += [f"*Syllables flagged by Su-śrotā in the conversion each clip keeps, leaving out the "
           "syllables it flags on Vāgdhenu's recording (so not comparable with Vāgdhenu's own rate; see section 7). 'Best of n': the "
           f"conversion with the fewest flags among n, on the version named. 'Best of {n_small}': averaged over {draws} "
           f"random sets of {n_small} conversions. Whichever version a conversion is chosen on looks better "
@@ -203,7 +203,7 @@ def write_report(out):
                              "Per conversion, median %": pc.raw_flag.median(), "Per conversion, max %": pc.raw_flag.max()},
                             {"Scoring": "after melody step", f"Syllables flagged, % (average of {n_conv} conversions)": s.melody_flag.mean() * 100,
                              "Per conversion, median %": pc.melody_flag.median(), "Per conversion, max %": pc.melody_flag.max()}])),
-          "", "*Complete table.*", ""]
+          ""]
 
     # per syllable across conversions
     g = s.groupby(["clip_id", "syllable"])
@@ -222,7 +222,7 @@ def write_report(out):
                      "Fail in all, after melody %": (ps.mel_n == n_conv).mean() * 100})
     cls = pd.DataFrame(rows)
     L += ["## 2. By sound class", "", _md(cls), "",
-          "*Complete table. A syllable counts in every class it contains. 'Fail in all' = flagged in every conversion.*", ""]
+          "*A syllable counts in every class it contains. 'Fail in all' = flagged in every conversion.*", ""]
 
     # 3. chance or systematic
     flagged = per[per.raw_n > 0]
@@ -241,12 +241,12 @@ def write_report(out):
           f"{n_conv}: {(flagged.raw_n == n_conv).sum()} ({(flagged.raw_n == n_conv).mean() * 100:.1f}%). Repeat rate "
           f"(flagged in conversion j' given flagged in j): {repeat * 100:.1f}%, against a base rate of {base * 100:.1f}%.", "",
           _md(pd.DataFrame({"Conversions failed": hist.index, "Syllables": hist.values}), ".0f"), "",
-          "*Complete table: flagged syllables by how many conversions they fail in.*", ""]
+          "*Flagged syllables by how many conversions they fail in.*", ""]
     allfail = per[per.raw_n == n_conv]
     if len(allfail):
         show = allfail.assign(classes=allfail[CLASSES].apply(lambda r: ", ".join(c for c in CLASSES if r[c]), axis=1))
         L += ["Syllables that fail in every conversion:", "", _md(show[["clip_id", "syllable", "text", "mel_n", "classes"]], ".0f"), "",
-              "*Complete list. mel_n: conversions in which it is also wrong after the melody step.*", ""]
+              "*mel_n: conversions in which it is also wrong after the melody step.*", ""]
 
     # 4. where failures come from: the converter or the melody step
     conv_made = s.raw_flag.sum()
@@ -259,7 +259,7 @@ def write_report(out):
                             {"Kind": "melody-made (right raw, wrong after melody)", "Syllable-conversions": mel_made},
                             {"Kind": "melody-fixed (wrong raw, right after melody)", "Syllable-conversions": mel_fixed},
                             {"Kind": "flagged after melody, all", "Syllable-conversions": after}]), ".0f"), "",
-          f"*Complete table.* Melody-made share of flags after the melody step: **{share:.1f}%**.", ""]
+          f"Melody-made share of flags after the melody step: **{share:.1f}%**.", ""]
 
     # 5. rescue curve
     per_clip = [d for _, d in s.groupby("clip_id")]
@@ -277,7 +277,7 @@ def write_report(out):
         curve.append({"Conversions": n, "Wrong in conversion 0 but right in another of the first n, %": rescued(s, n), "95% interval": f"[{lo:.1f}, {hi:.1f}]"})
     cur = pd.DataFrame(curve)
     L += ["## 5. Fixed by another conversion (raw)", "", _md(cur, ".1f"), "",
-          "*Complete table. Of the syllables conversion 0 gets wrong, the share that at least one of conversions 0 … n − 1 gets "
+          "*Of the syllables conversion 0 gets wrong, the share that at least one of conversions 0 … n − 1 gets "
           "right, each syllable on its own (different syllables may come from different conversions). Decision rule 1 uses "
           "it. 95% bootstrap over clips.*", ""]
 
@@ -299,7 +299,7 @@ def write_report(out):
             between.append({"kind": kind, "between conversions, mean cos": float(np.mean(cs)), "min cos": float(np.min(cs))})
     L += ["## 6. Voice consistency (no pass/fail)", "",
           "Within a clip: cosine of each 2 s window to the clip's mean window (mean over clips).", "", _md(vc, ".3f"), "",
-          _md(pd.DataFrame(close), ".3f"), "", _md(pd.DataFrame(between), ".3f"), "", "*Complete tables.*", ""]
+          _md(pd.DataFrame(close), ".3f"), "", _md(pd.DataFrame(between), ".3f"), ""]
 
     # 7. by style
     L += _by_style(s, s_all, out, n_conv, rescued, rng)

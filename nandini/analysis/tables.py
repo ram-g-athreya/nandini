@@ -93,6 +93,6 @@ def substitutions(s, out):
                                   "heard_deva": "Heard (Devanagari)", "errors": "Errors",
                                   "syllable_counted": "Syllable counted",
                                   "pct_of_syllable": "% of syllable"}).to_markdown(index=False), "",
-         f"*Complete table, {len(t)} rows, most frequent first.*", ""]
+         f"*{len(t)} rows, most frequent first.*", ""]
     (out / "substitutions.md").write_text("\n".join(L))
     print(f"substitutions: {len(t)} pairs")

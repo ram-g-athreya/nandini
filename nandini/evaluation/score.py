@@ -4,12 +4,12 @@
 
 Per render: Su-śrotā's character error rate against the verse text; duration; voice (ECAPA cosine to the mean of her
 training clips; the lowest 2 s window's cosine to the render's own mean, for a voice switch; median F0; mean log pitch
-in semitones, Praat 60-600 Hz). Pairs: melody correlation as registered in round 1 (pitch curves in semitones around
+in semitones, Praat 60-600 Hz). Pairs: melody correlation (pitch curves in semitones around
 each curve's median, pYIN 70-500 Hz, aligned by DTW on MFCCs, Pearson r over frames voiced in both) and duration ratio.
 
 Sets are reported separately, never pooled:
   A  every system against his recording of the verse (no pass/fail; N is read against V);
-  B  H4, registered in round 1, N against V: mean CER at most V's + H4_CER_MARGIN points, mean melody correlation with
+  B  H4, fixed before any render was made, N against V: mean CER at most V's + H4_CER_MARGIN points, mean melody correlation with
      V's render at least H4_MELODY_MIN, mean duration ratio within 1 +- H4_DURATION_TOL; Vs against V beside it;
   C  Vs against his demo MP3s (does our run of his system match his?);
 and the voice measures for every system, with the pitch offset N - V per verse against the dataset's shift k
@@ -29,7 +29,7 @@ _feat = {}
 
 
 def _features(path):
-    """pYIN pitch in semitones around its median, and MFCCs, as round 1's melody measure (16 kHz, 10 ms)."""
+    """pYIN pitch in semitones around its median, and MFCCs, for the melody measure (16 kHz, 10 ms)."""
     import librosa
     key = str(path)
     if key not in _feat:
@@ -42,7 +42,7 @@ def _features(path):
 
 
 def melody(a, b):
-    """Round 1's melody correlation (archive: checkpoint_trend.melody), unchanged."""
+    """Melody correlation: the two pitch curves aligned by DTW on MFCCs, Pearson r over frames voiced in both."""
     import librosa
     (sa, ma), (sb, mb) = _features(a), _features(b)
     _, wp = librosa.sequence.dtw(X=ma, Y=mb, metric="cosine")
@@ -161,13 +161,13 @@ def report(out, d, p):
         mel, dur = ci(g("B", "N", "melody", p), rng), ci(g("B", "N", "duration_ratio", p), rng)
         ok = [cn.mean() <= cv.mean() + C.H4_CER_MARGIN, mel[0] >= C.H4_MELODY_MIN,
               abs(dur[0] - 1) <= C.H4_DURATION_TOL]
-        L += [f"## Set B: {len(cn)} test verses, N against V (H4, registered 2026-11-06)", "",
+        L += [f"## Set B: {len(cn)} test verses, N against V (H4, fixed before rendering)", "",
               "| Test | Bar | N | Met |", "|:--|:--|:--|:--|",
               f"| Character errors, N − V (points) | mean ≤ +{C.H4_CER_MARGIN} | {fmt(dc)} (N {cn.mean():.2f}%, V "
               f"{cv.mean():.2f}%) | {'yes' if ok[0] else 'no'} |",
               f"| Melody correlation with V's render | mean ≥ {C.H4_MELODY_MIN} | {fmt(mel, 3)} | {'yes' if ok[1] else 'no'} |",
               f"| Duration, N ÷ V | mean within 1 ± {C.H4_DURATION_TOL} | {fmt(dur, 3)} | {'yes' if ok[2] else 'no'} |",
-              "", "*Complete.*", "", f"**H4 {'MET' if all(ok) else 'NOT MET'}** ({sum(ok)} of 3).", ""]
+              "", f"**H4 {'MET' if all(ok) else 'NOT MET'}** ({sum(ok)} of 3).", ""]
         if (p[(p.set == "B") & (p.system == "Vs")]).shape[0]:
             L += ["Beside it, his website's model against V on the same verses (no pass/fail): character errors Vs − V "
                   f"{fmt(ci((g('B', 'Vs', 'cer') - cv).dropna(), rng))} points; melody correlation "
@@ -185,7 +185,7 @@ def report(out, d, p):
             L.append(f"| {k} | {fmt(ci(g('A', k, 'melody', p), rng), 3)} | {fmt(ci(g('A', k, 'duration_ratio', p), rng), 3)} "
                      f"| {fmt(ci(g('A', k, 'cer'), rng))} |")
         L.append(f"| his recording | — | — | {fmt(ci(g('A', 'his', 'cer'), rng))} |")
-        L += ["", "*Complete.*", ""]
+        L += [""]
         if not g("A", "N", "melody", p).empty and not g("A", "V", "melody", p).empty:
             dm = ci((g("A", "N", "melody", p) - g("A", "V", "melody", p)).dropna(), rng)
             dd = ci((g("A", "N", "duration_ratio", p) - g("A", "V", "duration_ratio", p)).dropna(), rng)
@@ -198,7 +198,7 @@ def report(out, d, p):
         L += ["## Set C: his 6 demo verses, Vs against his MP3s", "",
               "| Verse | His meter label | Melody correlation | Duration ÷ his |", "|:--|:--|--:|--:|"]
         L += [f"| {r.source} | {r.his_meter} | {r.melody:.3f} | {r.duration_ratio:.3f} |" for r in c.itertuples()]
-        L += ["", "*Complete.*", ""]
+        L += [""]
 
     # Voice
     L += ["## Voice (no pass/fail)", "",
@@ -210,7 +210,7 @@ def report(out, d, p):
             if len(x):
                 L.append(f"| {s} | {k} | {fmt(ci(x.her_cosine, rng), 3)} | {fmt(ci(x.window_min, rng), 3)} | "
                          f"{fmt(ci(x.f0_median_hz, rng), 0)} |")
-    L += ["", "*Complete.*", ""]
+    L += [""]
     for s in ("A", "B"):
         n_, v_ = g(s, "N", "pitch_st"), g(s, "V", "pitch_st")
         off = (n_ - v_).dropna()

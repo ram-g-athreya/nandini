@@ -1,4 +1,4 @@
-# Every package of the training environment as tested (2026-11-07, round 1's run). Used with -c so a new environment
+# Every package of the training environment as tested (2026-11-07). Used with -c so a new environment
 # resolves the same versions.
 accelerate==0.34.2
 aiohappyeyeballs==2.7.1

@@ -11,7 +11,7 @@ speech check: does the model speak? 3 training verses (8–15 s; 2 style_a, 1 st
 inference at Vāgdhenu's locked voice_armA settings (euler, nfe 64, sway −0.7, seed 50) at cfg 1.2, and at cfg 3.0 (his
 production column) for comparison; the length is fixed to the clip's. Vocoder: vocos. Not his full renderer.
 
-trend check: the 10 check verses (--verses, default manifests/training_check_verses.csv: round 1's checkpoint-trend verses, drawn with seed
+trend check: the 10 check verses (--verses, default manifests/training_check_verses.csv, drawn with seed
 20261109) rendered exactly as his website does (demo/app.py): his verse text from the dataset's metadata unchanged,
 meter auto-detected (else his vasantatilakā fallback), `Renderer.render_one(text, meter, seed=60)` with his defaults, his
 render_core.py unchanged (external/vagdhenu). Changes, all from outside his code: the model (--ema), the reference bank

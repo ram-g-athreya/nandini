@@ -146,7 +146,7 @@ def run(args):
          "## By style", "", summary(kept, "style").to_markdown(index=False), "",
          "## Errors kept per verse, by style", "", "![Errors kept per verse, by style](errors-by-style.png)", "",
          dist_t.to_markdown(index=False), "",
-         f"*Complete table (the chart's numbers). 5+ pools 5 to the maximum. 0 to {C.MAX_ERRORS} met the bar; more "
+         f"*The chart's numbers. 5+ pools 5 to the maximum. 0 to {C.MAX_ERRORS} met the bar; more "
          f"are verses kept with their best of {C.N_CONVERSIONS} attempts.*", "",
          "## Attempts used", "", "![Attempts used per verse, by style](attempts-used.png)", "",
          used.rename_axis("Attempts").reset_index().to_markdown(index=False), "",

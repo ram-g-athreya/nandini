@@ -67,7 +67,7 @@ def simulate(a):
          "## By meter", "", summary(v, "family", C.MAX_ERRORS, C.N_CONVERSIONS).to_markdown(index=False), "",
          "## Attempts used", "",
          pd.DataFrame({"Attempts": dist.index, "Verses": dist.values}).to_markdown(index=False), "",
-         "*Complete tables. 'Kept, % syllables wrong' is judged by the same ASR that decided when to stop, so it is "
+         "*'Kept, % syllables wrong' is judged by the same ASR that decided when to stop, so it is "
          "optimistic.*", ""]
     (out / "simulation.md").write_text("\n".join(L))
     print("\n".join(L))
@@ -105,12 +105,12 @@ def threshold(a):
          "scored by Su-śrotā. Error: a syllable it gets right on Vāgdhenu's recording and wrong on the attempt. Both "
          f"rules keep the best of {n_att} if the target is never reached.", "",
          "## The two rules", "", rules.to_markdown(index=False), "",
-         f"*Complete table. Stopping at 0 takes {ratio:.2f} times the attempts of stopping at ≤ 1. Under ≤ 1, {hard} "
+         f"*Stopping at 0 takes {ratio:.2f} times the attempts of stopping at ≤ 1. Under ≤ 1, {hard} "
          f"of the {total} kept errors are in verses kept with 2 or more errors (none of their {n_att} attempts reached "
          "≤ 1), which no stricter threshold changes. Error rates are judged by the ASR that made the selection, so "
          "they are optimistic, more so for the stricter rule.*", "",
          "## Su-śrotā on Vāgdhenu's own recordings", "", floor.to_markdown(index=False), "",
-         "*Complete table. Vāgdhenu's recordings are taken as correctly pronounced, so these misreads are the judge's "
+         "*Vāgdhenu's recordings are taken as correctly pronounced, so these misreads are the judge's "
          "own error on human chanting.*", ""]
     (out / "threshold.md").write_text("\n".join(L))
     print("\n".join(L))

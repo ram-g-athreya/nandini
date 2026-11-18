@@ -1,4 +1,4 @@
-"""Vocoder measures, as round 1 defined them, and the rules that use them. Light imports only (numpy, scipy, librosa,
+"""Vocoder measures (echo, shiver, new errors) and the rules that use them. Light imports only (numpy, scipy, librosa,
 parselmouth), so they run in the training environment (the monitor) and in this code's environment (the score).
 
 echo:   the frame-rate peak in the cepstrum, at the quefrency of one hop (256 samples, 93.75 Hz at 24 kHz) and its double.

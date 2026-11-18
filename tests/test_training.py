@@ -62,7 +62,7 @@ def test_training_commands_need_the_training_environment(tmp_path, monkeypatch):
 
 
 def test_check_verses_are_round_1s():
-    """The 10 check verses: drawn from the full manifest with seed 20261109, as round 1's checkpoint trend."""
+    """The 10 check verses: drawn from the full manifest with seed 20261109."""
     import pandas as pd
     v = pd.read_csv(C.ROOT / "manifests" / "training_check_verses.csv")
     m = pd.read_csv(C.ROOT / "manifests" / "all_clips.csv")
