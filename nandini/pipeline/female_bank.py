@@ -96,8 +96,8 @@ def run(a):
     out.mkdir(parents=True, exist_ok=False)
     man = pd.read_csv(a.manifest)
     man["cid"] = man.clip_id.str.split("/").str[-1].str.removesuffix(".wav")
-    kept = (pd.read_csv(a.kept) if a.kept else
-            pd.concat(pd.read_csv(p) for p in sorted(Path(a.run).glob("kept_part*.csv")))).set_index("clip_id")
+    from ..dataset import kept_list
+    kept = kept_list(a.run, a.kept).set_index("clip_id")
     audio = Path(a.audio_dir or Path(a.run) / "final")
     ov = pd.read_csv(a.overrides).set_index("entry") if a.overrides else pd.DataFrame()
     rows = []

@@ -47,3 +47,17 @@ def conv_path(out, j, clip_id):
 
 def melody_path(out, j, clip_id):
     return Path(out) / "melody" / f"c{j}" / f"{key(clip_id)}.wav"
+
+
+def kept_list(run, kept=None):
+    """The kept list of a run: --kept if given, else OUT/kept_rechecked.csv (after `nandini recheck-halves`), else generate's
+    kept_part*.csv."""
+    import pandas as pd
+    if kept:
+        return pd.read_csv(kept)
+    if (Path(run) / "kept_rechecked.csv").exists():
+        return pd.read_csv(Path(run) / "kept_rechecked.csv")
+    parts = sorted(Path(run).glob("kept_part*.csv"))
+    if not parts:
+        raise SystemExit(f"no kept_rechecked.csv or kept_part*.csv in {run}; pass --kept")
+    return pd.concat([pd.read_csv(p) for p in parts]).sort_values("index")

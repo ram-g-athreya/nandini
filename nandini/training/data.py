@@ -2,7 +2,7 @@
 
   nandini training-data [--run out] [--kept KEPT.csv] [--audio-dir DIR] [--out training/dataset] [--text-only]
 
-Runs in the training environment (external/train-env). For each kept verse (a run folder's kept_part*.csv, or --kept):
+Runs in the training environment (external/train-env). For each kept verse (--kept, else the run folder's kept_rechecked.csv, else its kept_part*.csv):
 the audio is <audio-dir>/<key>.wav (default <run>/final/), the text his `model_text` of the manifest's verse (punctuation
 stripped, Kannada script, no sandhi), called from his prep_text.py in external/vagdhenu, not a copy. Stops with nothing
 written if a clip is missing, isn't 24 kHz mono, falls outside IndicF5's 0.3–30 s, or has a character outside his
@@ -41,12 +41,8 @@ def model_text_fn():
 
 
 def kept_rows(run, kept):
-    if kept:
-        return pd.read_csv(kept)
-    parts = sorted(Path(run).glob("kept_part*.csv"))
-    if not parts:
-        sys.exit(f"no kept_part*.csv in {run}; pass --kept")
-    return pd.concat([pd.read_csv(p) for p in parts]).sort_values("index")
+    from ..dataset import kept_list
+    return kept_list(run, kept)
 
 
 def rows(a):

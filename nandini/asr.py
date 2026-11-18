@@ -71,9 +71,10 @@ def half_cut(y, sr, t):
 
 def half_point(verse, path):
     """Time (s) at which the verse's second half starts on a recording: the start of syllable n // 2, from the timed
-    transcript (the half-verse pause in every meter of this dataset)."""
+    transcript (the half-verse pause in every meter of this dataset), rounded to 10 ms as the released run stored it. The
+    cut is sensitive: a cut 1 ms away can change what the recogniser hears."""
     _, h, times, dur = transcribe_timed(path)
-    return float(syllable_starts(verse, h, times, dur)[verse.n // 2])
+    return round(float(syllable_starts(verse, h, times, dur)[verse.n // 2]), 2)
 
 
 def transcribe_halves(path, t):

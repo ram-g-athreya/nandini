@@ -4,6 +4,7 @@
   nandini manifest   --out OUT.csv [--select CLIPS.csv] [--dataset-dir DIR]
   nandini generate   [--seed-vc DIR --seed-vc-python PY] [--manifest M] [--out OUT] [--part i/P] [--indices a,b]
                      [--scoring whole|halves]
+  nandini recheck-halves [--run out] [--dataset-dir D]        the verses that missed, re-checked half a verse at a time
   nandini inventory  convert|score|report [--manifest M] [--out OUT] [...]
   nandini mark       [--run out] [--dataset-dir D] [--part i/P]   what the ASR hears on each kept verse
   nandini tables     [--run out]                                 transcripts, per-syllable and substitution tables
@@ -124,6 +125,11 @@ def main(argv=None):
     p.add_argument("--scoring", choices=["whole", "halves"], default="whole",
                    help="transcribe each clip whole, or in two halves cut at the half-verse pause (default whole)")
 
+    p = sub.add_parser("recheck-halves", help="re-check the verses that missed, each half verse heard alone; writes kept_rechecked.csv")
+    p.add_argument("--run", default=str(C.ROOT / "out"), help="the run folder from `nandini generate` (default: out)")
+    p.add_argument("--manifest", default=str(FULL), help="manifest with the verses' texts (default: all clips)")
+    p.add_argument("--dataset-dir", help="local copy of the dataset (default: the Hugging Face cache)")
+
     p = sub.add_parser("inventory", help="measure how the converter gets syllables wrong")
     p.add_argument("step", choices=["convert", "score", "report"])
     _run_options(p, SAMPLE, "inventory")
@@ -173,7 +179,7 @@ def main(argv=None):
 
     p = sub.add_parser("training-data", help="each kept clip with Vāgdhenu's model_text, and IndicF5's dataset files")
     p.add_argument("--run", default=str(C.ROOT / "out"), help="the run folder from `nandini generate` (default: out)")
-    p.add_argument("--kept", help="kept list to use instead of the run's kept_part*.csv")
+    p.add_argument("--kept", help="kept list to use instead of the run's kept_rechecked.csv (or kept_part*.csv)")
     p.add_argument("--audio-dir", help="folder of the kept clips (default: RUN/final)")
     p.add_argument("--manifest", default=str(FULL), help="manifest with the verses' texts (default: all clips)")
     p.add_argument("--out", default=str(C.ROOT / "training/dataset"), help="output folder (default: training/dataset)")
@@ -233,7 +239,7 @@ def main(argv=None):
 
     p = sub.add_parser("female-bank", help="Vāgdhenu's reference cuts, taken from the kept clips, each scored")
     run_folder(p, dataset=True)
-    p.add_argument("--kept", help="kept list to use instead of the run's kept_part*.csv")
+    p.add_argument("--kept", help="kept list to use instead of the run's kept_rechecked.csv (or kept_part*.csv)")
     p.add_argument("--audio-dir", help="folder of the kept clips (default: RUN/final)")
     p.add_argument("--out", default=str(C.ROOT / "training/female_bank"), help="output folder (default: training/female_bank)")
     p.add_argument("--overrides", default=str(C.ROOT / "manifests" / "female_bank_overrides.csv"),
@@ -352,6 +358,9 @@ def main(argv=None):
     elif a.command == "generate":
         _need_seed_vc(a)
         from .pipeline.generate_dataset import run
+        run(a)
+    elif a.command == "recheck-halves":
+        from .pipeline.recheck_halves import run
         run(a)
     elif a.command == "inventory":
         if a.step == "convert":

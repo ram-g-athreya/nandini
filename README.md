@@ -28,9 +28,9 @@ Each verse goes through up to 10 attempts (`nandini generate`):
   own mistakes on his chant aren't counted against the clip.
 - **Keep or retry:** the first attempt with at most 1 error is kept; if none of the 10 gets there, the one with the
   fewest errors.
-- **Re-check in halves:** on long verses the recogniser can lose its place and misread a whole stretch of a good clip.
-  So the verses that missed were re-checked with each half verse transcribed on its own, and where an attempt now had
-  at most 1 error, the first such attempt replaced the kept one ([how the released audio was made](#making-the-dataset)).
+- **Re-check in halves** (`nandini recheck-halves`): on long verses the recogniser can lose its place and misread a
+  whole stretch of a good clip. So each verse that missed has its 10 attempts checked again, with each half verse
+  transcribed on its own. If an attempt now has at most 1 error, the first such attempt replaces the kept one.
 
 All 1,467 verses are kept, so the dataset has the same verses, styles and meters as Vāgdhenu's: 1,298 (88.5%) with at
 most 1 syllable wrong.
@@ -62,6 +62,7 @@ Everything runs through one command, `nandini`, with every setting in one file, 
 | `nandini/dataset.py` | the source recordings: where a clip's audio is, which clips a run covers, output paths |
 | `nandini/pipeline/manifest.py` | `nandini manifest`: writes a manifest of clips with fixed indices |
 | `nandini/pipeline/generate_dataset.py` | `nandini generate`: makes the dataset (the loop above) |
+| `nandini/pipeline/recheck_halves.py` | `nandini recheck-halves`: the verses that missed, re-checked in halves; the final kept list |
 | `nandini/analysis/inventory.py` | `nandini inventory`: measures how the converter gets syllables wrong, on a sample of clips |
 | `nandini/analysis/inventory_report.py` | the inventory's report |
 | `nandini/analysis/marks.py` | `nandini mark`: what the ASR hears on each kept verse, per syllable, with timings |
@@ -90,6 +91,7 @@ Everything runs through one command, `nandini`, with every setting in one file, 
 | `manifests/pitch_shift_verses.csv` | the 61 verses the target voice read to measure k |
 | `manifests/inventory_sample_clips.csv` | a 61-clip sample, stratified by meter within each style, for the inventory |
 | `manifests/training_check_verses.csv` | the 10 verses the checks after training render (seed 20261109) |
+| `manifests/released_kept.csv` | the kept attempt of every verse in the released dataset, as training used it |
 | `manifests/female_bank_overrides.csv` | the bank entries changed by hand, with reasons |
 | `manifests/test_verses.csv` | 60 new verses for evaluation, outside the dataset, from the Digital Corpus of Sanskrit (CC BY 4.0; [Test verses](#test-verses)) |
 | `manifests/test_verses_pool.csv`, `test_verses_report.md` | every candidate verse with its checks, and how the 60 were drawn |
@@ -230,17 +232,32 @@ Outputs:
 
 Every conversion and melody-step file is kept under `out/conversions/` and `out/melody/`.
 
+Then re-check the verses that missed:
+
+```bash
+nandini recheck-halves
+```
+
+Each verse that missed the bar has its attempts on disk checked again in halves (below), against Vāgdhenu's recording
+checked the same way. The selection rule runs again on these scores: if an attempt now has at most 1 error, the first
+such attempt is kept instead; otherwise the verse keeps what `generate` kept. Verses that met the bar aren't touched.
+- `out/recheck_halves.csv`: every recording and attempt re-checked, with its errors in halves.
+- `out/kept_rechecked.csv`: the final kept list, one row per verse, with `scoring` (`whole` or `halves`) and `generate`'s choice
+  beside it (`whole_kept_j`, `whole_errors`, `whole_counted`). Later commands read this file when it's there.
+- `out/final/`: the clip is replaced where the kept attempt changed.
+
 Options:
 - `--part i/P` splits the run into P parallel parts.
 - `--indices a,b` runs a subset; `--manifest` and `--out` choose other clips or another folder.
 - A stopped run restarts where it left off.
-- `--scoring halves` scores in two halves instead of whole clips (see below).
+- `--scoring halves` scores every verse in halves from the start, instead of whole clips (see below). The release
+  scored whole clips and re-checked only the verses that missed.
 
-**Scoring in halves (`--scoring halves`):** on some long verses Su-śrotā drops a stretch of a whole clip (verse 1343
-reads with 16 or more errors whole and 1 in halves), which wrongly marks good attempts as bad. With this option every
-recording and attempt is cut at the half-verse pause, each half is transcribed alone, and the two transcripts are
+**Scoring in halves:** on some long verses Su-śrotā drops a stretch of a whole clip (verse 1343 reads with 16 or more
+errors whole and 1 in halves), which wrongly marks good attempts as bad. In halves, every recording and attempt is cut
+at the half-verse pause, each half is transcribed alone, and the two transcripts are
 joined and scored against the whole verse as before. The pause is found from Vāgdhenu's recording (the start of
-syllable n // 2) and moved to the quietest 20 ms nearby in each clip. Errors, the bar and the rule are unchanged. It
+syllable n // 2, to 10 ms) and moved to the quietest 20 ms nearby in each clip. Errors, the bar and the rule are unchanged. It
 costs two transcriptions per clip, plus one timed transcription of Vāgdhenu's recording per verse.
 
 **How the released audio was made:**
@@ -250,10 +267,14 @@ costs two transcriptions per clip, plus one timed transcription of Vāgdhenu's r
   10.
 - **Error rate:** 2.19% of counted syllables are wrong. This count comes from the same ASR that chose each attempt, so
   it is optimistic.
-- **Re-check in halves:** the 255 verses that missed were scored again in halves, on the same 10 attempts. 86 then had
+- **Re-check in halves:** the 255 verses that missed were checked again in halves, on the same 10 attempts. 86 then had
   an attempt with at most 1 error, and took the first such attempt (55 a different attempt, 31 the same one); the
   other 169 kept their best of 10. Result: 1,298 verses (88.5%) at the bar, and 1.97% of counted syllables wrong (a
-  mix of whole and halves scoring). Training used this kept list.
+  mix of whole and halves scoring).
+- **The released kept list:** `manifests/released_kept.csv`, in the format of `out/kept_rechecked.csv`. Training used it. A
+  rerun on other hardware can keep a different attempt for some verses ([Same results, not identical
+  audio](#same-results-not-identical-audio)), so `--kept manifests/released_kept.csv` trains on exactly the released
+  choice.
 
 **Why at most 1 error, not 0:** Su-śrotā misreads about 4.7% of syllables on Vāgdhenu's own recordings, so a single
 error in a verse (about 2% of a typical 46-syllable verse) is within the judge's own noise. On the 61-clip sample, a
@@ -378,8 +399,9 @@ nandini female-bank                      # training/female_bank/: his reference 
 - **The female bank:** his renderer copies voice, melody and pace from a meter-matched reference clip in its bank. The
   same cuts are taken from the kept clips, so only the voice changes; `manifests/female_bank_overrides.csv` lists the
   three entries changed by hand and why.
-- **Run folder:** `training-data` and `female-bank` read `out/` (its `kept_part*.csv` and `final/`); `--kept` and
-  `--audio-dir` read another kept list.
+- **Run folder:** `training-data` and `female-bank` read `out/`: its `kept_rechecked.csv` (after `recheck-halves`, else its
+  `kept_part*.csv`) and `final/`. `--kept` and `--audio-dir` read another kept list, such as
+  `manifests/released_kept.csv`.
 - **Where files go:** the default folders (`out/`, `training/`, `inventory/`, `pitch_shift/`) are inside this folder,
   wherever a command is run from, so the commands find each other's outputs without flags. All are gitignored.
 
