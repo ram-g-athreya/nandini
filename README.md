@@ -1,6 +1,6 @@
 # Nandinī: a female voice for Vāgdhenu
 
-Code for making a female Sanskrit chant voice for [Vāgdhenu](https://huggingface.co/datasets/prathoshap/vagdhenu-data).
+Code for making a female Sanskrit chant voice for [Vāgdhenu](https://prathosh.in/vagdhenu/).
 Vāgdhenu's released chant (1,467 clips, about 5.3 hours) is all in one male voice. Each clip is converted to the female
 voice with a voice converter, and Vāgdhenu's melody is then put back with the WORLD vocoder.
 
