@@ -420,7 +420,9 @@ the text, with a paired bootstrap over the verses, plus voice consistency agains
 pass/fail. These are training verses: the checks show that the model speaks and that training levelled off, not that it
 generalises.
 
-**As released:** RunPod, 2 × RTX A6000 (48 GB each): 0.88 s per step, 216 min for 14,800 steps.
+**As released:** RunPod, 2 × RTX A6000 (48 GB each): 0.88 s per step, 216 min for 14,800 steps. Vāgdhenu's code was at commit c18927a for the
+release run; it is now pinned at 8bd7733, which leaves its training script, text preparation and renderer unchanged (the
+renderer's text helpers moved to `chant_text.py`) and adds the MLX backend.
 
 **The vocoder.** The model makes a mel spectrogram; a vocoder turns it into sound. Vocos (IndicF5's own) adds a shiver on
 long held notes, which is why Vāgdhenu fine-tuned NVIDIA's BigVGAN-v2 on IndicF5's mel of his voice. His BigVGAN adds a
@@ -448,6 +450,30 @@ nandini vocoder score --decoded vocos=D1 fine-tune=D2 --verses T/verses.csv --ou
 - **Measures:** echo is the frame-rate peak in the cepstrum; shiver is the share of a held note's loudness modulation at
   5–30 Hz (`nandini/analysis/vocoder_measures.py`).
 - `decode` joins each verse's pieces as his renderer does: with vocos it reproduces the render exactly.
+
+**Rendering on Apple silicon (MLX).** Vāgdhenu's code includes an MLX backend (added by
+[aieunlabs](https://github.com/aieunlabs) in Vāgdhenu's pull request #22), which runs the model and BigVGAN natively on
+Apple GPUs with no torch at render time. It takes Nandinī's weights unchanged. Convert them once (this step needs torch,
+which this code's environment has), then render with the female bank:
+
+```bash
+uv venv external/mlx-env && uv pip install --python external/mlx-env/bin/python -r external/vagdhenu/requirements-mlx.txt
+PYTHONPATH=external/vagdhenu/src .venv/bin/python -m vagdhenu_mlx.convert --voice training/run/ema/ema_14800.pt \
+    --vocoder training/vocoder/run/vocoder.pt --vocab external/vagdhenu/src/reference_bank/vocab.txt --out training/mlx
+```
+
+```python
+import sys; sys.path.insert(0, "external/vagdhenu/src")
+from vagdhenu_mlx import Renderer, detect_meter_key
+r = Renderer("training/mlx", bank_path="training/female_bank/bank.json")
+text = "वसुदेवसुतं देवं कंसचाणूरमर्दनम् । देवकीपरमानन्दं कृष्णं वन्दे जगद्गुरुम् ॥"
+sr, audio = r.render_one(text, detect_meter_key(text) or "vasantatilakā", seed=60)
+```
+
+On a MacBook Air M2, a 10 to 12 s verse took 47 to 60 s; on 5 test verses the character error rate, voice and pitch
+matched the torch renders. Pass `bank_path`: his `render_mlx.py` script uses his own bank, which would give his voice's
+melody references. The port renders a verse's pādas in one batch and runs the model in bfloat16, so its audio is close
+to, not identical with, the torch renderer's.
 
 ## Comparing with Vāgdhenu
 

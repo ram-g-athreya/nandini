@@ -25,7 +25,7 @@ INFERENCE_CFG_RATE = 0.7
 # Outside code, fetched by `nandini fetch` into external/ (gitignored) at these commits, never copied into this repo.
 SEED_VC_REPO = "https://github.com/Plachtaa/seed-vc.git"  # runs the converter; commit SEED_VC_COMMIT above
 VAGDHENU_REPO = "https://github.com/prathoshap/vagdhenu.git"  # Vāgdhenu's code: training script, text, renderer
-VAGDHENU_COMMIT = "c18927a8a77775753e32248177a5a6bea1019a12"
+VAGDHENU_COMMIT = "8bd7733dd1aba6352235fe83eb3dfac322a343eb"
 BIGVGAN_REPO = "https://github.com/NVIDIA/BigVGAN.git"  # imported by Vāgdhenu's renderer when it loads (unused: vocos)
 BIGVGAN_COMMIT = "7d2b454564a6c7d014227f635b7423881f14bdac"
 

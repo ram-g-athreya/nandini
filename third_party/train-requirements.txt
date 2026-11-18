@@ -1,4 +1,4 @@
-# Training environment (Python 3.10): Vāgdhenu's requirements.txt at c18927a, unchanged, plus datasets/pyarrow pins (below).
+# Training environment (Python 3.10): Vāgdhenu's requirements.txt at 8bd7733 (the same as at c18927a, the release run's commit), unchanged, plus datasets/pyarrow pins (below).
 # torch/torchaudio 2.4.1 first (CUDA 12.1 wheels on Linux), then:
 #   uv pip install --python external/train-env/bin/python --override third_party/train-overrides.txt \
 #       -c third_party/train-constraints.txt -r third_party/train-requirements.txt
