@@ -365,8 +365,7 @@ the text, with a paired bootstrap over the verses, plus voice consistency agains
 pass/fail. These are training verses: the checks show that the model speaks and that training levelled off, not that it
 generalises.
 
-**As released:** RunPod, 2 × RTX A6000 (48 GB each). Round 1 of this method measured 0.85 s per step on the same setup,
-about 3.5 h for 14,800 steps.
+**As released:** RunPod, 2 × RTX A6000 (48 GB each): 0.88 s per step, 216 min for 14,800 steps.
 
 **The vocoder.** The model makes a mel spectrogram; a vocoder turns it into sound. Vocos (IndicF5's own) adds a shiver on
 long held notes, which is why Vāgdhenu fine-tuned NVIDIA's BigVGAN-v2 on IndicF5's mel of his voice. His BigVGAN adds a
