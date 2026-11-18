@@ -1,0 +1,10 @@
+# Rendering with the ONNX version (`nandini onnx render`) without PyTorch: an environment of its own, e.g.
+#   uv venv external/onnx-env --python 3.10 && uv pip install --python external/onnx-env/bin/python -r third_party/onnx-requirements.txt -e . --no-deps
+# Versions as tested (2026-11-18). Making the files and checking them against torch (`nandini onnx make`, `check`) run in
+# the training environment instead, with onnx and onnxruntime added: uv pip install --python external/train-env/bin/python onnx==1.23.2 onnxruntime==1.23.2
+onnxruntime==1.23.2
+numpy==1.26.4
+scipy==1.15.3
+soundfile==0.14.0
+pydub==0.25.1
+indic-transliteration==2.3.82

@@ -32,7 +32,20 @@ The following parts of this repository, and the things the code downloads, carry
    from DCS lines, words joined as printed text joins them, and written in Devanagari. Credit the DCS when sharing
    them.
 
-5. Models and data the code downloads (not included here)
+5. nandini/onnx/ (the ONNX version)
+
+   - render.py follows Vāgdhenu's renderer (prathoshap/vagdhenu, Apache-2.0) and uses, from Vāgdhenu's code fetched
+     into external/, its text front end and the torch-free audio front end and tokenizer of its MLX backend
+     (src/vagdhenu_mlx/, added by aieunlabs in Vāgdhenu's pull request #22). chunk_text is IndicF5's, as in that
+     backend.
+   - small.py's rank-32 AdaLN follows the design of Hemanth HM's browser version of Vāgdhenu
+     (https://github.com/hemanth/sanskrit-tts-web; weights https://huggingface.co/gnumanth/sanskrit-tts-onnx, MIT).
+     His browser version was also the reference for splitting the model into ONNX graphs. No code or weights of his
+     are included.
+   - vocos_spectrum.onnx, made by `nandini onnx make`, holds IndicF5's stock vocoder, Vocos
+     (charactr/vocos-mel-24khz, MIT), for Vāgdhenu's retry test.
+
+6. Models and data the code downloads (not included here)
 
    - Vāgdhenu dataset, prathoshap/vagdhenu-data: CC-BY-4.0.
    - IndicVoiceChanger, DreamSyncCo/IndicVoiceChanger (a Seed-VC checkpoint): GPL-3.0.

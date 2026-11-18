@@ -22,6 +22,7 @@
   nandini vocoder    data|align|train|monitor|average|decode|score   his BigVGAN fine-tuned on her clips, as he made his
   nandini test-verses [--out manifests/test_verses.csv]          set B: verses outside the dataset, from DCS (CC BY 4.0)
   nandini compare    render --system V|Vs|N [...] | score        Nandinī against Vāgdhenu on his website's path
+  nandini onnx       make | check graphs|verses|score | render   the ONNX version of Nandinī (no torch to render)
   nandini female-bank [--run out] [--kept K.csv] [--audio-dir D] [--out training/female_bank]   reference cuts, her voice
   nandini config     print the settings (nandini/config.py)
 
@@ -70,6 +71,9 @@ CHECKS = ("speech-check", "trend-check")
 TRAIN_NEEDS = {"training-data": ("indic_transliteration", "datasets"), "warm-start": ("f5_tts",),
                "train": ("f5_tts", "accelerate"), "extract-ema": ("torch",), "test-verses": ("indic_transliteration",)}
 COMPARE_NEEDS = {"render": ("f5_tts",), "score": ()}
+ONNX_NEEDS = {"make": ("f5_tts", "onnx"), "small": ("f5_tts", "onnx"), "graphs": ("f5_tts", "onnxruntime"),
+              "verses": ("f5_tts", "onnxruntime"), "score": (), "score-small": (),
+              "render": ("onnxruntime", "indic_transliteration", "pydub")}
 
 
 VOCODER_NEEDS = {"data": ("f5_tts",), "align": ("f5_tts", "vocos", "parselmouth"), "decode": ("vocos",),
@@ -82,6 +86,9 @@ def _needs(a):
         return VOCODER_NEEDS[a.step]
     if a.command == "compare":
         return COMPARE_NEEDS[a.step]
+    if a.command == "onnx":
+        return ONNX_NEEDS[a.check if a.step == "check" else a.step] if not (a.step == "check" and a.check == "small") \
+            else ("torch", "onnxruntime", "indic_transliteration", "pydub")
     if a.command in CHECKS:
         return () if a.step == "score" else ("f5_tts", "vocos")
     if a.command == "training-data" and a.text_only:
@@ -284,6 +291,36 @@ def main(argv=None):
     q.add_argument("--decoded", nargs="+", help="vocos=DIR fine-tune=DIR [his=DIR], each from `vocoder decode` on the same mels")
     q.add_argument("--verses", help="the renders' verses.csv (from `trend-check render`)")
 
+    p = sub.add_parser("onnx", help="the ONNX version of Nandinī: make it, check it against torch, render with it")
+    os_ = p.add_subparsers(dest="step", required=True)
+    q = os_.add_parser("make", help="the two ONNX files from the PyTorch weights (training environment)")
+    q.add_argument("--ema", required=True, help="the model (EMA checkpoint)")
+    q.add_argument("--vocoder", required=True, help="the vocoder file (from `nandini vocoder average`)")
+    q.add_argument("--out", default=str(C.ROOT / "training/onnx"), help="output folder (default: training/onnx)")
+    train_python(q)
+    q = os_.add_parser("small", help="smaller files from the fp32 ones: int8 and rank-32 transformer, fp16 and int8 vocoder")
+    q.add_argument("--ema", required=True, help="the model (EMA checkpoint), for the rank-32 AdaLN")
+    q.add_argument("--onnx", default=str(C.ROOT / "training/onnx"), help="the ONNX folder (default: training/onnx)")
+    train_python(q)
+    q = os_.add_parser("check", help="the ONNX version against torch: graphs, verses (training environment), score")
+    q.add_argument("check", choices=["graphs", "verses", "score", "small", "score-small"])
+    q.add_argument("--ema", help="graphs, verses: the model (EMA checkpoint)")
+    q.add_argument("--vocoder", help="graphs, verses: the vocoder file")
+    q.add_argument("--bank", help="graphs, verses: the reference bank folder (holding bank.json)")
+    q.add_argument("--onnx", default=str(C.ROOT / "training/onnx"), help="the ONNX folder (default: training/onnx)")
+    q.add_argument("--n", nargs="+", type=int, default=[1, 2, 3, 4, 5], help="verses: test verses (default: 1-5)")
+    train_python(q)
+    q = os_.add_parser("render", help="render with the ONNX version (onnxruntime, no torch)")
+    q.add_argument("--onnx", default=str(C.ROOT / "training/onnx"), help="the ONNX folder (default: training/onnx)")
+    q.add_argument("--bank", required=True, help="the reference bank folder (holding bank.json)")
+    q.add_argument("--text", help="a verse (Devanagari; lines split at daṇḍas or newlines)")
+    q.add_argument("--meter", help="with --text: the meter (default: detected, else vasantatilakā)")
+    q.add_argument("--out", default="out.wav", help="with --text: the output wav (default: out.wav)")
+    q.add_argument("--seed", type=int, default=C.WEB_SEED, help=f"default {C.WEB_SEED}, his website's")
+    q.add_argument("--steps", type=int, default=64, help="sampling steps (default 64, his)")
+    q.add_argument("--threads", type=int, default=0, help="onnxruntime threads (default: all cores)")
+    train_python(q)
+
     p = sub.add_parser("compare", help="Nandinī (N) against Vāgdhenu (V, Vs) through his website's path")
     cs = p.add_subparsers(dest="step", required=True)
     q = cs.add_parser("render", help="one system's renders of its sets (training environment)")
@@ -318,6 +355,19 @@ def main(argv=None):
             from .evaluation.render import run
         else:
             from .evaluation.score import run
+        run(a)
+        return
+    if a.command == "onnx":
+        _in_train_env(a, argv)
+        if a.step == "make":
+            from .onnx.make import run
+        elif a.step == "small":
+            from .onnx.small import run
+        elif a.step == "check":
+            a.step = a.check
+            from .onnx.check import run
+        else:
+            from .onnx.render import run
         run(a)
         return
     if a.command == "vocoder":

@@ -85,6 +85,7 @@ Everything runs through one command, `nandini`, with every setting in one file, 
 | `nandini/training/ema.py` | `nandini extract-ema`: a checkpoint's EMA weights only |
 | `nandini/training/checks.py`, `nandini/analysis/training_checks.py` | `nandini speech-check` / `trend-check`: renders after training, and their scores |
 | `nandini/training/vocoder.py`, `nandini/analysis/vocoder_score.py`, `nandini/analysis/vocoder_measures.py` | `nandini vocoder`: the vocoder fine-tune, decoding saved mels, and its scores |
+| `nandini/onnx/` | `nandini onnx`: the ONNX version (`make`, `small`, `check`, and `render` without torch) |
 | `nandini/pipeline/female_bank.py` | `nandini female-bank`: his reference cuts, taken from the kept clips |
 | `tests/` | quick checks that need no models or downloads (`pytest`) |
 | `manifests/all_clips.csv` | all 1,467 clips: index, clip, style, meter, text |
@@ -97,7 +98,7 @@ Everything runs through one command, `nandini`, with every setting in one file, 
 | `manifests/test_verses_pool.csv`, `test_verses_report.md` | every candidate verse with its checks, and how the 60 were drawn |
 | `voice/female_voice_sample.wav` | the 25 s sample that sets the female voice |
 | `docs/dataset_pipeline.png`, `.tex` | the dataset diagram above, and its TikZ source |
-| `third_party/` | pinned requirements for the Seed-VC, Indic-Speak and training environments, and a patch for Seed-VC on Apple silicon (GPL-3.0, like Seed-VC) |
+| `third_party/` | pinned requirements for the Seed-VC, Indic-Speak, training and ONNX environments, and a patch for Seed-VC on Apple silicon (GPL-3.0, like Seed-VC) |
 | `external/` | not in the repo (gitignored): outside code fetched by `nandini fetch`, and the Seed-VC and training environments |
 | `uv.lock` | the exact package versions of this code's environment for the release run |
 | `LICENSE`, `NOTICE` | the code's licence (Apache-2.0), and the parts with their own terms |
@@ -474,6 +475,72 @@ On a MacBook Air M2, a 10 to 12 s verse took 47 to 60 s; on 5 test verses the ch
 matched the torch renders. Pass `bank_path`: his `render_mlx.py` script uses his own bank, which would give his voice's
 melody references. The port renders a verse's pādas in one batch and runs the model in bfloat16, so its audio is close
 to, not identical with, the torch renderer's.
+
+## The ONNX version
+
+Nandinī also comes as ONNX files, so it runs with onnxruntime and no PyTorch. The renderer (`nandini/onnx/render.py`)
+follows Vāgdhenu's own renderer step by step: his text front end, meter choice, reference bank, sampler, retry rule,
+gate and stitching. Only the model and the vocoders run in ONNX.
+
+| File | What it is | Inputs → outputs |
+|:--|:--|:--|
+| `nandini_dit.onnx` (1,358 MB) | the transformer, one evaluation | `x`, `cond`, `text`, `t` → `flow` |
+| `nandini_vocoder.onnx` (451 MB) | the fine-tuned BigVGAN | `mel` → `wave` |
+| `vocos_spectrum.onnx` (54 MB) | IndicF5's stock vocos, up to its spectrum | `mel` → `real`, `imag` |
+
+- **The transformer** takes the guided and the unguided pass as a batch of two: IndicF5's unguided pass is the same
+  call with the reference mel zeroed and every token set to the filler (`-1`), so the graph needs no flags.
+- **BigVGAN's** anti-aliasing filters expand their kernels at run time, which ONNX can't size; they are stored
+  pre-expanded (`fixed_filters` in `nandini/onnx/make.py`), with the same output to the sample.
+- **vocos is not Nandinī's voice.** Vāgdhenu's renderer redoes a line when vocos's output is quiet, and that test needs
+  vocos's output, so it is included for the test only. Its inverse STFT doesn't export, so the graph stops at the
+  spectrum and numpy does the rest.
+
+```bash
+uv pip install --python external/train-env/bin/python onnx==1.23.2 onnxruntime==1.23.2
+nandini onnx make --ema training/run/ema/ema_14800.pt --vocoder training/vocoder/run/vocoder.pt   # -> training/onnx/
+nandini onnx check graphs --ema ... --vocoder ... --bank training/female_bank   # each graph against torch
+nandini onnx check verses --ema ... --vocoder ... --bank training/female_bank   # 5 test verses, torch and ONNX
+nandini onnx check score                                                        # length and Su-śrotā's errors
+```
+
+To render without PyTorch, in an environment of its own (`third_party/onnx-requirements.txt`):
+
+```bash
+uv venv external/onnx-env --python 3.10 && uv pip install --python external/onnx-env/bin/python -r third_party/onnx-requirements.txt -e . --no-deps
+external/onnx-env/bin/nandini onnx render --bank training/female_bank --text "वसुदेवसुतं देवं कंसचाणूरमर्दनम्" --out out.wav
+```
+
+**Checked against torch** (MacBook Air M2, CPU):
+
+| Check | Bar | Result |
+|:--|:--|:--|
+| Each graph, the same real inputs (a bank reference, a verse's tokens, fixed noise) | largest difference ≤ 1e-4 of the output's range | transformer at most 5.0e-5 (t = 0, 0.3, 0.9); BigVGAN 1.1e-5; vocos with the numpy inverse STFT 6.9e-6 |
+| 5 test verses, Vāgdhenu's torch renderer and the ONNX renderer from the same noise | the same length to the sample; Su-śrotā's character errors within 1 per verse | all 5 the same length; errors identical on all 5; mean log-mel difference 0.006 to 0.008 nats |
+
+On the CPU of a MacBook Air M2, a 9 to 12 s verse takes about 6 to 10 minutes at 64 steps, like the torch renderer on
+the same CPU.
+
+**Smaller files.** `nandini onnx small --ema ...` writes, beside the fp32 files: the transformer with its weights stored
+as int8 (one scale per output column, arithmetic still float), the same with AdaLN factorised to rank 32 (one shared
+projection of the time embedding, then a 32-wide matrix per block, after Hemanth's browser version of Vāgdhenu,
+[gnumanth/sanskrit-tts-onnx](https://huggingface.co/gnumanth/sanskrit-tts-onnx), MIT), and BigVGAN stored as fp16 or
+int8. `nandini onnx check small` renders the check verses with every combination from the same noise, and
+`check score-small` compares each with the fp32 render.
+
+| Transformer + vocoder | MB | Mean log-mel difference from fp32 (frame by frame / time-averaged) | Su-śrotā errors, 5 verses |
+|:--|--:|:--|:--|
+| fp32 + fp32 | 1,809.5 | — | 16 |
+| fp32 + int8 | 1,472.7 | 0.047 / 0.011 | 16, identical per verse |
+| int8 + int8 | 480.1 | 0.734 / 0.054 | 17 |
+| rank-32 int8 + int8 | 344.0 | 0.744 / 0.055 | 18 |
+| fp32 + fp32 with another seed (61) | 1,809.5 | 1.654 / 0.134 | 13 |
+
+Add 54.2 MB for `vocos_spectrum.onnx`, which the renderer uses for the retry test. The int8 vocoder reproduces the fp32
+render closely. The compressed transformers give different renders, as a different seed does, but each is about half
+as far from the fp32 render as another seed of the fp32 files is. They missed the bars set before the run (Su-śrotā's
+errors within 1 per verse, and 0.09 nats frame by frame, which turned out stricter than two seeds of the fp32 files),
+so the fp32 transformer is the reference and the compact ones are offered as measured above. On five verses.
 
 ## Comparing with Vāgdhenu
 

@@ -88,6 +88,12 @@ INDICF5_BASE_REV = "fb652a96e508091045890dae5bb99fe511facbcf"
 VAGDHENU_WEIGHTS_REPO = "prathoshap/vagdhenu"  # his released models; his BigVGAN is loaded by the renderer, then unused
 VAGDHENU_WEIGHTS_REV = "0b8b7474c1899471b3d2b6a3ee919ab6c9373ebc"
 VOCAB_SHA256 = "d3a5ff6aac12ea4fb50628a66a97b20c1e83b9e5ca356e5afae17b511cda96df"  # his reference_bank/vocab.txt
+
+# The ONNX version (`nandini onnx`): fp32 graphs at this opset; the per-graph check's bar is the largest difference
+# against torch as a share of the output's range.
+ONNX_OPSET = 17
+ONNX_GRAPH_TOL = 1e-4
+ONNX_CHAR_TOL = 1  # check 2: Su-śrotā's character errors on a verse, torch against ONNX, at most this apart
 TRAIN_EPOCHS = 600  # his script's default: sets the learning-rate schedule (warm-up 500, then linear to 0)
 TRAIN_LR = 1e-5
 TRAIN_WARMUP = 500
