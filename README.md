@@ -1,27 +1,55 @@
 # Nandinī: a female voice for Vāgdhenu
 
-Code for making a female Sanskrit chant voice for [Vāgdhenu](https://prathosh.in/vagdhenu/).
-Vāgdhenu's released chant (1,467 clips, about 5.3 hours) is all in one male voice. Each clip is converted to the female
-voice with a voice converter, and Vāgdhenu's melody is then put back with the WORLD vocoder.
+Code for making a female Sanskrit chant voice for [Vāgdhenu](https://prathosh.in/vagdhenu/), with no recordings of a
+female reciter. Vāgdhenu's released chant (1,467 clips, about 5.3 hours) is all in one male voice, and so is its model.
+Nandinī is made in two parts:
+
+1. **The dataset:** each of Vāgdhenu's clips is converted into a female voice, and his melody is put back, so every
+   clip keeps his chant (text, timing and tune) in the new voice.
+2. **The voice:** IndicF5 is fine-tuned on those clips with Vāgdhenu's own recipe, and the two other parts his renderer
+   needs, the reference bank and the vocoder, are remade for the new voice. The result runs in Vāgdhenu's renderer
+   unchanged.
 
 ## How it works
 
-```
-Vāgdhenu recording  ──► voice conversion ──► melody step ──► ASR check ──► ≤ 1 error? ──yes──► keep
-                       (IndicVoiceChanger,   (WORLD: its pitch   (Su-śrotā)        │
-                        female voice sample)  + k semitones,                         no
-                                              its voicing and                        ▼
-                                              energy)                     next seed (up to 10), else keep the best
-```
+### Making the dataset
 
-- **Voice conversion:** the converter turns Vāgdhenu's recording into the female voice set by one voice sample. The
-  seed is fixed per attempt and per verse, so every run makes the same conversions.
-- **Melody step:** the converter's own pitch and timing drift from the chant, so Vāgdhenu's pitch is put back,
-  raised by k semitones (one k per chant style), with its voicing and frame energy.
-- **ASR check:** [Su-śrotā](https://huggingface.co/prathoshap/sushrota-sanskrit-asr) transcribes the result. A syllable
-  counts as an **error** if Su-śrotā gets it right on Vāgdhenu's recording and wrong on the conversion.
-- **Keep or retry:** keep the first attempt with at most 1 error; otherwise try the next seed, up to 10 attempts, and
-  keep the one with the fewest errors.
+![How each clip is made: up to 10 attempts of voice conversion, melody step and recogniser check per verse](docs/dataset_pipeline.png)
+
+Each verse goes through up to 10 attempts (`nandini generate`):
+
+- **Voice conversion:** a voice converter (IndicVoiceChanger) turns Vāgdhenu's recording into the voice of a 25 s
+  sample. Each attempt uses its own fixed seed, so every run makes the same conversions.
+- **Melody step:** the converter keeps the new voice but drifts from the chant's pitch, so the clip is resynthesised
+  with WORLD on Vāgdhenu's pitch, raised by k semitones (one k per chant style: +6.74 and +6.58), with his voicing and
+  loudness. His timing is kept as it is.
+- **Recogniser check:** [Su-śrotā](https://huggingface.co/prathoshap/sushrota-sanskrit-asr) transcribes both the clip
+  and Vāgdhenu's recording. An **error** is a syllable it hears right in his recording and wrong in the clip, so its
+  own mistakes on his chant aren't counted against the clip.
+- **Keep or retry:** the first attempt with at most 1 error is kept; if none of the 10 gets there, the one with the
+  fewest errors.
+- **Re-check in halves:** on long verses the recogniser can lose its place and misread a whole stretch of a good clip.
+  So the verses that missed were re-checked with each half verse transcribed on its own, and where an attempt now had
+  at most 1 error, the first such attempt replaced the kept one ([how the released audio was made](#making-the-dataset)).
+
+All 1,467 verses are kept, so the dataset has the same verses, styles and meters as Vāgdhenu's: 1,298 (88.5%) with at
+most 1 syllable wrong.
+
+### Training the voice
+
+Vāgdhenu's renderer makes chant from three parts: a model, a reference bank and a vocoder. Each is remade for the new
+voice, and nothing else changes ([Training](#training)):
+
+- **The model:** IndicF5 fine-tuned on the 1,467 clips with Vāgdhenu's training script and settings, unchanged, to his
+  length (14,800 steps; the EMA weights are used, as his are).
+- **The reference bank:** for each meter, his renderer copies melody and pace from a short reference clip. The same cuts
+  are taken from the same verses of the new dataset, so only the voice differs from his bank.
+- **The vocoder:** turns the model's mel spectrogram into sound. IndicF5's own vocoder (vocos) adds a shiver on long held
+  notes, and Vāgdhenu's fine-tuned BigVGAN adds an echo on a female voice, so BigVGAN-v2 is fine-tuned on the new clips
+  the way he fine-tuned it on his.
+
+Checks after training confirm the model speaks and that training had levelled off. It is then compared with
+Vāgdhenu's own models on 60 verses neither has seen ([Comparing with Vāgdhenu](#comparing-with-vāgdhenu)).
 
 ## What's in this folder
 
@@ -66,6 +94,7 @@ Everything runs through one command, `nandini`, with every setting in one file, 
 | `manifests/test_verses.csv` | 60 new verses for evaluation, outside the dataset, from the Digital Corpus of Sanskrit (CC BY 4.0; [Test verses](#test-verses)) |
 | `manifests/test_verses_pool.csv`, `test_verses_report.md` | every candidate verse with its checks, and how the 60 were drawn |
 | `voice/female_voice_sample.wav` | the 25 s sample that sets the female voice |
+| `docs/dataset_pipeline.png`, `.tex` | the dataset diagram above, and its TikZ source |
 | `third_party/` | pinned requirements for the Seed-VC, Indic-Speak and training environments, and a patch for Seed-VC on Apple silicon (GPL-3.0, like Seed-VC) |
 | `external/` | not in the repo (gitignored): outside code fetched by `nandini fetch`, and the Seed-VC and training environments |
 | `uv.lock` | the exact package versions of this code's environment for the release run |
@@ -221,6 +250,10 @@ costs two transcriptions per clip, plus one timed transcription of Vāgdhenu's r
   10.
 - **Error rate:** 2.19% of counted syllables are wrong. This count comes from the same ASR that chose each attempt, so
   it is optimistic.
+- **Re-check in halves:** the 255 verses that missed were scored again in halves, on the same 10 attempts. 86 then had
+  an attempt with at most 1 error, and took the first such attempt (55 a different attempt, 31 the same one); the
+  other 169 kept their best of 10. Result: 1,298 verses (88.5%) at the bar, and 1.97% of counted syllables wrong (a
+  mix of whole and halves scoring). Training used this kept list.
 
 **Why at most 1 error, not 0:** Su-śrotā misreads about 4.7% of syllables on Vāgdhenu's own recordings, so a single
 error in a verse (about 2% of a typical 46-syllable verse) is within the judge's own noise. On the 61-clip sample, a
