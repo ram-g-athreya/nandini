@@ -1,0 +1,4 @@
+# Keeps his torch 2.4.1. x-transformers 2.19.7 needs torch-einops-utils>=0.0.34, and every release of that declares
+# torch>=2.5 (PyPI, checked 2026-11-07), so his pins can't install together as declared; plain pip would upgrade torch.
+torch==2.4.1
+torchaudio==2.4.1

@@ -1,0 +1,18 @@
+# Training environment (Python 3.10): Vāgdhenu's requirements.txt at c18927a, unchanged, plus datasets/pyarrow pins (below).
+# torch/torchaudio 2.4.1 first (CUDA 12.1 wheels on Linux), then:
+#   uv pip install --python external/train-env/bin/python --override third_party/train-overrides.txt \
+#       -c third_party/train-constraints.txt -r third_party/train-requirements.txt
+git+https://github.com/ai4bharat/IndicF5.git@13f7c4d627cc10111aea8fe9c0039462cacacdc7
+transformers==4.46.3
+accelerate==0.34.2
+vocos==0.1.0
+x-transformers==2.19.7
+numpy==1.26.4
+librosa==0.11.0
+soundfile
+huggingface_hub
+indic-transliteration
+# Added 2026-11-07: IndicF5 leaves datasets unpinned; 2.14.4 is the version tested here, and it needs pyarrow < 21
+# (it uses pyarrow.PyExtensionType). constraints_train.txt pins every other package to the tested versions.
+pyarrow==20.0.0
+datasets==2.14.4

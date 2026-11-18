@@ -1,0 +1,50 @@
+Nandinī: a female voice for Vāgdhenu's Sanskrit chant
+Copyright 2026 The Nandinī authors
+
+This code is licensed under the Apache License, Version 2.0 (see LICENSE). Keep this NOTICE file in any
+redistribution, as the License requires.
+
+The following parts of this repository, and the things the code downloads, carry their own terms.
+
+1. voice/female_voice_sample.wav
+
+   Built with Indic-Speak from Bodhan AI / AI4Bharat (https://huggingface.co/bodhan-ai/indic-speak,
+   revision 76e0814, speaker Bharati). This 25-second clip is output of Indic-Speak and is distributed under the
+   Bodhan AI Open Model License, not under Apache-2.0. Among its terms: keep this credit; its acceptable-use
+   restrictions apply to the clip and to whatever you make with it (for example, no voice clones of real people
+   without their consent, no robocalls or voice-phishing); and very large commercial users and hosted APIs need a
+   separate agreement with Bodhan AI. Read the full licence on the model page before using the clip.
+
+2. third_party/seed-vc-mps-float32.patch
+
+   A modification of Seed-VC (https://github.com/Plachtaa/seed-vc), licensed under the GNU General Public License,
+   version 3. The patch is distributed under GPL-3.0, not under Apache-2.0.
+
+3. Audio made with this code
+
+   It is derived from the Vāgdhenu dataset (https://huggingface.co/datasets/prathoshap/vagdhenu-data), licensed
+   CC-BY-4.0: credit Vāgdhenu and its authors when sharing it.
+
+4. manifests/test_verses.csv, test_verses_pool.csv, test_verses_report.md
+
+   Verse texts from the Digital Corpus of Sanskrit (DCS), Oliver Hellwig, 2010-2024
+   (https://github.com/OliverHellwig/sanskrit, commit 8aeed5a1343d), licensed CC BY 4.0. Changes: verses assembled
+   from DCS lines, words joined as printed text joins them, and written in Devanagari. Credit the DCS when sharing
+   them.
+
+5. Models and data the code downloads (not included here)
+
+   - Vāgdhenu dataset, prathoshap/vagdhenu-data: CC-BY-4.0.
+   - IndicVoiceChanger, DreamSyncCo/IndicVoiceChanger (a Seed-VC checkpoint): GPL-3.0.
+   - Seed-VC, Plachtaa/seed-vc: GPL-3.0. It runs as a separate program in its own environment; this code does not
+     include or link it.
+   - Su-śrotā ASR, prathoshap/sushrota-sanskrit-asr: no licence stated on its model card at the pinned revision.
+   - ECAPA speaker model, speechbrain/spkrec-ecapa-voxceleb: Apache-2.0.
+   - Vāgdhenu's code, prathoshap/vagdhenu (GitHub), fetched into external/ by `nandini fetch`: Apache-2.0. Its
+     training script, text frontend and renderer are run unmodified; nothing of it is copied here.
+   - BigVGAN, NVIDIA/BigVGAN (GitHub), fetched into external/: MIT. Imported by Vāgdhenu's renderer.
+   - IndicF5 code (ai4bharat/IndicF5 on GitHub, installed in the training environment) and the IndicF5 base model
+     (ai4bharat/IndicF5 on Hugging Face, gated), and Vāgdhenu's released models (prathoshap/vagdhenu on Hugging Face):
+     see their own repositories and model cards.
+
+   Each is used under its own licence. Check them before using or sharing anything this code produces.

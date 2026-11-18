@@ -1,0 +1,9 @@
+# The vocoder fine-tune's extras (`nandini vocoder`), installed into the training environment on top of its pins:
+#   uv pip install --python external/train-env/bin/python -c third_party/train-constraints.txt -r third_party/vocoder-requirements.txt
+# NVIDIA's train.py imports pesq, auraloss, nnAudio (its CQT discriminator) and tensorboard; the monitor's held note
+# uses Praat (parselmouth), as round 1 measured it.
+pesq==0.0.4
+auraloss==0.4.0
+nnAudio==0.3.4
+tensorboard==2.21.0
+praat-parselmouth==0.4.7

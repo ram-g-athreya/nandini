@@ -1,0 +1,48 @@
+[project]
+name = "nandini"
+version = "0.2.0"
+description = "Nandinī: a female voice for Vāgdhenu's Sanskrit chant, made by converting its released recordings."
+requires-python = ">=3.10,<3.11"
+license = {text = "Apache-2.0"}
+dependencies = [
+    "torch>=2.5,<2.8",
+    "torchaudio>=2.5,<2.8",  # not imported here; pinned so speechbrain's torchaudio matches torch (unpinned it resolves to 2.11)
+    "numpy<2",
+    "pandas>=2.2",
+    "tabulate>=0.9",  # pandas' to_markdown, for the inventory report
+    "soundfile>=0.12",
+    "librosa>=0.10",
+    "scipy>=1.11",
+    "pyworld>=0.3.4",  # the melody step (WORLD)
+    "setuptools<81",  # pyworld imports pkg_resources
+    "huggingface-hub>=0.26",  # dataset and model downloads
+    "nemo_toolkit[asr]>=2.2",  # Su-śrotā, the ASR
+    "speechbrain>=1.0",  # speaker embeddings, for the inventory's voice consistency
+    "matplotlib>=3.8",  # the dataset report's charts
+    "praat-parselmouth>=0.4.5",  # pitch tracking, for measuring the pitch shift k
+]
+
+[project.scripts]
+nandini = "nandini.cli:main"
+
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["nandini*"]
+
+[tool.setuptools.package-data]
+"nandini.listening" = ["page.html"]
+
+[tool.uv]
+package = true
+# the lock's date: without it here, `uv sync` or `uv run` re-locks against today's packages
+exclude-newer = "2026-11-11T23:15:00Z"
+
+[dependency-groups]
+test = ["pytest>=8"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

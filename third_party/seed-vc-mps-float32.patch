@@ -1,0 +1,19 @@
+Seed-VC on Apple silicon: run in float32 on MPS. A modification of Seed-VC (https://github.com/Plachtaa/seed-vc),
+distributed under the GNU General Public License, version 3, like Seed-VC itself (not under this repository's
+Apache-2.0). Apply with: git -C path/to/seed-vc apply path/to/seed-vc-mps-float32.patch
+
+diff --git a/inference.py b/inference.py
+index 84d673b..01eb747 100644
+--- a/inference.py
++++ b/inference.py
+@@ -326,8 +326,8 @@ def main(args):
+         F0_ori = f0_fn(ori_waves_16k[0], thred=0.03)
+         F0_alt = f0_fn(converted_waves_16k[0], thred=0.03)
+ 
+-        F0_ori = torch.from_numpy(F0_ori).to(device)[None]
+-        F0_alt = torch.from_numpy(F0_alt).to(device)[None]
++        F0_ori = torch.from_numpy(F0_ori).float().to(device)[None]  # MPS has no float64
++        F0_alt = torch.from_numpy(F0_alt).float().to(device)[None]  # MPS has no float64
+ 
+         voiced_F0_ori = F0_ori[F0_ori > 1]
+         voiced_F0_alt = F0_alt[F0_alt > 1]

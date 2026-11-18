@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nandinī Listening</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Devanagari:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root { --bg:#f7f6f2; --card:#fff; --ink:#1f1f1c; --muted:#6b6a64; --line:#e4e2da; --accent:#2a78d6;
+        --good:#1e6b3a; --good-bg:#e1f2e6; --warn:#8a5a00; --warn-bg:#fbefd5; --bad:#b3261e; --bad-bg:#fbe3e1; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg:#161614; --card:#201f1d; --ink:#ecebe6;
+  --muted:#a3a29b; --line:#34332f; --accent:#3987e5; --good:#8fd6a6; --good-bg:#1c3a26; --warn:#f0c46b; --warn-bg:#3d2f12;
+  --bad:#ff8a80; --bad-bg:#4a1f1c; } }
+:root[data-theme="dark"] { --bg:#161614; --card:#201f1d; --ink:#ecebe6; --muted:#a3a29b; --line:#34332f; --accent:#3987e5;
+  --good:#8fd6a6; --good-bg:#1c3a26; --warn:#f0c46b; --warn-bg:#3d2f12; --bad:#ff8a80; --bad-bg:#4a1f1c; }
+* { box-sizing:border-box; }
+body { margin:0; background:var(--bg); color:var(--ink); font:15px/1.5 system-ui,-apple-system,sans-serif; }
+main { max-width:900px; margin:0 auto; padding:20px 16px 48px; }
+h1 { font-size:22px; margin:0 0 4px; }
+.intro { color:var(--muted); margin:0 0 14px; font-size:14px; }
+.bar { position:sticky; top:0; z-index:5; background:var(--bg); padding:10px 0; border-bottom:1px solid var(--line);
+       display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:14px; }
+select, input[type=number], button, textarea { font:inherit; color:var(--ink); background:var(--card);
+       border:1px solid var(--line); border-radius:8px; padding:5px 8px; }
+button { cursor:pointer; }
+button:hover { border-color:var(--accent); }
+.progress { color:var(--muted); font-size:13px; margin-left:auto; }
+.card { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:16px 18px; margin:0 0 14px; }
+.head { display:flex; flex-wrap:wrap; gap:8px; align-items:baseline; margin:0 0 8px; }
+.head b { font-size:16px; }
+.id { color:var(--muted); font-size:13px; }
+.verse { font-family:"Noto Serif Devanagari",serif; font-size:21px; line-height:1.85; margin:0 0 12px; }
+.players { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.label { font-size:13px; color:var(--muted); margin-bottom:4px; }
+audio { width:100%; }
+.verse span.err { color:var(--bad); background:var(--bad-bg); border-radius:4px; font-weight:600; }
+.verse span.both { color:var(--muted); text-decoration:underline dotted; }
+.verse span.now { outline:2px solid var(--accent); outline-offset:1px; border-radius:4px; }
+.legend span { margin-right:12px; }
+.verse span[data-tip] { cursor:help; }
+#tip { position:fixed; z-index:20; display:none; max-width:340px; background:var(--ink); color:var(--bg);
+       font:13px/1.45 system-ui,-apple-system,sans-serif; padding:7px 10px; border-radius:8px; white-space:pre-line;
+       pointer-events:none; box-shadow:0 4px 14px rgba(0,0,0,.18); }
+.pill { display:inline-block; padding:1px 8px; border-radius:999px; font-weight:600; font-size:13px; }
+.e0 { color:var(--good); background:var(--good-bg); } .e1 { color:var(--warn); background:var(--warn-bg); }
+.e2 { color:var(--bad); background:var(--bad-bg); }
+.stats { color:var(--muted); font-size:13px; }
+.verdict { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-top:12px; }
+.verdict button.on[data-v=good] { background:var(--good-bg); color:var(--good); border-color:var(--good); font-weight:600; }
+.verdict button.on[data-v=minor] { background:var(--warn-bg); color:var(--warn); border-color:var(--warn); font-weight:600; }
+.verdict button.on[data-v=bad] { background:var(--bad-bg); color:var(--bad); border-color:var(--bad); font-weight:600; }
+.verdict input[type=text] { flex:1; min-width:180px; font:inherit; color:var(--ink); background:var(--card);
+       border:1px solid var(--line); border-radius:8px; padding:5px 8px; }
+.pager { display:flex; gap:8px; align-items:center; justify-content:center; margin:18px 0; }
+.empty { color:var(--muted); text-align:center; padding:40px 0; }
+@media (max-width:600px) { .players { grid-template-columns:1fr; } .verse { font-size:18px; } .progress { margin-left:0; } }
+</style></head><body><main>
+<h1>Nandinī, verse by verse</h1>
+<p class="intro">All __N__ verses. For each verse: Vāgdhenu's recording, Nandinī's kept clip, and the
+text. <b>Errors</b> are syllables Su-śrotā reads right on Vāgdhenu's recording and wrong on Nandinī's, judged by the same
+ASR that chose the kept attempt (optimistic). Your verdicts are saved in this browser; use <b>Export CSV</b> to keep them.</p>
+<p class="intro legend verse" style="font-size:14px;font-family:inherit"><span><span class="err">red</span> right on Vāgdhenu, wrong on Nandinī (an error)</span>
+<span><span class="both">grey dotted</span> wrong on both (not counted)</span>
+<span><span class="now">outlined</span> being sung (approximate)</span></p>
+<div class="bar">
+  <select id="style"><option value="">All styles</option><option>style_a</option><option>style_b</option></select>
+  <select id="meter"><option value="">All meters</option></select>
+  <select id="err"><option value="">Any errors</option><option value="0">0 errors</option><option value="1">1 error</option>
+    <option value="2">2 or more</option></select>
+  <select id="verdict"><option value="">Any verdict</option><option value="none">Not rated</option>
+    <option value="good">Good</option><option value="minor">Minor issue</option><option value="bad">Bad</option></select>
+  <select id="sort"><option value="i">By verse number</option><option value="err">Most errors first</option></select>
+  <label class="stats">Go to verse <input id="goto" type="number" min="1" style="width:80px"></label>
+  <button id="export">Export CSV</button>
+  <label><button id="importBtn" type="button">Import CSV</button><input id="import" type="file" accept=".csv" hidden></label>
+  <span class="progress" id="progress"></span>
+</div>
+<div id="list"></div>
+<div id="tip" role="tooltip"></div>
+<div class="pager"><button id="prev">← Previous</button><span id="pageinfo" class="stats"></span><button id="next">Next →</button></div>
+</main>
+<script>
+const DATA = __DATA__;
+const PER = 20, KEY = "nandini-verdicts";
+let verdicts = {};
+try { verdicts = JSON.parse(localStorage.getItem(KEY) || "{}"); } catch (e) { verdicts = {}; }
+function save() { try { localStorage.setItem(KEY, JSON.stringify(verdicts)); } catch (e) {} progress(); }
+const $ = id => document.getElementById(id);
+[...new Set(DATA.map(d => d.meter))].sort().forEach(m => $("meter").add(new Option(m, m)));
+let page = 0, view = [];
+const esc = s => s.replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function filter() {
+  const st = $("style").value, me = $("meter").value, er = $("err").value, ve = $("verdict").value;
+  view = DATA.filter(d => (!st || d.style === st) && (!me || d.meter === me) &&
+    (er === "" || (er === "2" ? d.err >= 2 : d.err === +er)) &&
+    (!ve || (ve === "none" ? !(verdicts[d.id] && verdicts[d.id].v) : (verdicts[d.id] || {}).v === ve)));
+  if ($("sort").value === "err") view.sort((a, b) => b.err - a.err || a.i - b.i);
+}
+function card(d) {
+  const v = verdicts[d.id] || {}, cls = d.err === 0 ? "e0" : d.err === 1 ? "e1" : "e2";
+  const btn = (val, lab) => `<button data-v="${val}" class="${v.v === val ? "on" : ""}">${lab}</button>`;
+  return `<section class="card" data-id="${esc(d.id)}">
+  <div class="head"><b>${d.i}.</b><span>${d.style} · ${d.meter}</span><span class="id">${esc(d.name)}</span>
+    <span class="pill ${cls}">${d.err} error${d.err === 1 ? "" : "s"}</span>
+    <span class="stats">${d.counted} of ${d.syl} syllables counted · kept attempt ${d.kj + 1} of ${d.att}</span></div>
+  <p class="verse" lang="sa">${verseHtml(d)}</p>
+  <div class="players">
+    <div><div class="label">Vāgdhenu</div><audio controls preload="none" data-who="h" src="${encodeURI(d.his)}"></audio></div>
+    <div><div class="label">Nandinī</div><audio controls preload="none" data-who="n" src="${encodeURI(d.hers)}"></audio></div>
+  </div>
+  <div class="verdict">${btn("good", "Good")}${btn("minor", "Minor issue")}${btn("bad", "Bad")}
+    <input type="text" placeholder="Note (optional)" value="${esc(v.note || "")}"></div>
+</section>`;
+}
+function verseHtml(d) {
+  if (!d.sy) return esc(d.text);
+  const said = x => x[0] || x[1] ? `${x[0]} (${x[1]})` : "nothing";
+  return d.sy.map(([t, sp], k) => {
+    const h = d.hf[k] === "1", n = d.nf[k] === "1", hd = d.heard && d.heard[k];
+    const cls = h && n ? "both" : (n ? "err" : "");
+    let title = h && n ? "wrong on both (not counted)" : n ? "right on Vāgdhenu, wrong on Nandinī" :
+      (h ? "wrong on Vāgdhenu only" : "");
+    if (hd) title += `\nASR heard on Vāgdhenu: ${said(hd[0])}\nASR heard on Nandinī: ${said(hd[1])}`;
+    return (sp ? " " : "") + `<span data-k="${k}" class="${cls}"${title ? ` data-tip="${esc(title)}"` : ""}>${esc(t)}</span>`;
+  }).join("");
+}
+// Tooltip drawn by the page (the browser's own title tooltips are slow and not shown everywhere): hover or click.
+const tip = document.getElementById("tip");
+function showTip(el) {
+  tip.textContent = el.dataset.tip; tip.style.display = "block";
+  const r = el.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight;
+  tip.style.left = Math.max(8, Math.min(innerWidth - w - 8, r.left + r.width / 2 - w / 2)) + "px";
+  tip.style.top = (r.top - h - 8 < 8 ? r.bottom + 8 : r.top - h - 8) + "px";
+}
+const hideTip = () => { tip.style.display = "none"; };
+document.addEventListener("mouseover", e => { const el = e.target.closest("[data-tip]"); el ? showTip(el) : hideTip(); });
+document.addEventListener("click", e => { const el = e.target.closest("[data-tip]"); if (el) showTip(el); });
+addEventListener("scroll", hideTip, {passive: true});
+const byId = Object.fromEntries(DATA.map(d => [d.id, d]));
+let follow = null;
+function track(a) {
+  const card = a.closest(".card"), d = byId[card.dataset.id];
+  if (!d.sy) return;
+  const t = a.dataset.who === "h" ? d.ht : d.nt, spans = card.querySelectorAll(".verse span[data-k]");
+  let cur = -1;
+  const step = () => {
+    if (a.paused || a.ended) { if (cur >= 0) spans[cur].classList.remove("now"); follow = null; return; }
+    let k = 0; while (k + 1 < t.length && t[k + 1] <= a.currentTime) k++;
+    if (a.currentTime < t[0]) k = -1;
+    if (k !== cur) { if (cur >= 0) spans[cur].classList.remove("now"); if (k >= 0) spans[k].classList.add("now"); cur = k; }
+    follow = requestAnimationFrame(step);
+  };
+  if (follow) cancelAnimationFrame(follow);
+  document.querySelectorAll(".verse span.now").forEach(s => s.classList.remove("now"));
+  step();
+}
+document.addEventListener("playing", e => track(e.target), true);
+document.addEventListener("seeked", e => { if (!e.target.paused) track(e.target); }, true);
+function render() {
+  const pages = Math.max(1, Math.ceil(view.length / PER));
+  page = Math.min(page, pages - 1);
+  const slice = view.slice(page * PER, page * PER + PER);
+  $("list").innerHTML = slice.length ? slice.map(card).join("") : `<p class="empty">No verses match these filters.</p>`;
+  $("pageinfo").textContent = `Page ${page + 1} of ${pages} · ${view.length} verses`;
+  $("prev").disabled = page === 0; $("next").disabled = page >= pages - 1;
+  progress();
+}
+function progress() {
+  const n = Object.values(verdicts).filter(v => v.v).length;
+  $("progress").textContent = `${n} of ${DATA.length} rated`;
+}
+function refresh() { page = 0; filter(); render(); }
+["style", "meter", "err", "verdict", "sort"].forEach(id => $(id).addEventListener("change", refresh));
+$("prev").onclick = () => { page--; render(); scrollTo(0, 0); };
+$("next").onclick = () => { page++; render(); scrollTo(0, 0); };
+$("goto").addEventListener("change", e => {
+  $("style").value = $("meter").value = $("err").value = $("verdict").value = ""; $("sort").value = "i"; filter();
+  const k = view.findIndex(d => d.i === +e.target.value); if (k < 0) return;
+  page = Math.floor(k / PER); render();
+  document.querySelector(`[data-id="${CSS.escape(view[k].id)}"]`).scrollIntoView({block: "start"});
+});
+$("list").addEventListener("click", e => {
+  const b = e.target.closest("button[data-v]"); if (!b) return;
+  const id = b.closest(".card").dataset.id, v = verdicts[id] || {};
+  v.v = v.v === b.dataset.v ? "" : b.dataset.v; verdicts[id] = v; save();
+  b.parentElement.querySelectorAll("button[data-v]").forEach(x => x.classList.toggle("on", x.dataset.v === v.v));
+});
+$("list").addEventListener("input", e => {
+  if (e.target.type !== "text") return;
+  const id = e.target.closest(".card").dataset.id; (verdicts[id] = verdicts[id] || {}).note = e.target.value; save();
+});
+// One audio at a time.
+document.addEventListener("play", e => document.querySelectorAll("audio").forEach(a => a !== e.target && a.pause()), true);
+const csvq = s => `"${String(s).replace(/"/g, '""')}"`;
+$("export").onclick = () => {
+  const lines = ["index,clip_id,style,meter,errors,verdict,note"];
+  DATA.forEach(d => { const v = verdicts[d.id]; if (v && (v.v || v.note))
+    lines.push([d.i, d.id, d.style, d.meter, d.err, v.v || "", v.note || ""].map(csvq).join(",")); });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([lines.join("\n") + "\n"], {type: "text/csv"}));
+  a.download = `nandini_verdicts_${new Date().toISOString().slice(0, 10)}.csv`; a.click();
+};
+$("importBtn").onclick = () => $("import").click();
+$("import").addEventListener("change", async e => {
+  const f = e.target.files[0]; if (!f) return;
+  const rows = (await f.text()).trim().split("\n").slice(1);
+  const parse = line => { const out = []; let cur = "", q = false;
+    for (let i = 0; i < line.length; i++) { const c = line[i];
+      if (q) { if (c === '"' && line[i + 1] === '"') { cur += '"'; i++; } else if (c === '"') q = false; else cur += c; }
+      else if (c === '"') q = true; else if (c === ",") { out.push(cur); cur = ""; } else cur += c; }
+    out.push(cur); return out; };
+  let n = 0;
+  rows.forEach(r => { const c = parse(r); if (c.length >= 7) { verdicts[c[1]] = {v: c[5], note: c[6]}; n++; } });
+  save(); refresh(); alert(`Imported ${n} verdicts.`);
+});
+refresh();
+</script></body></html>

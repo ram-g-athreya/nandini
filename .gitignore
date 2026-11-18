@@ -1,0 +1,15 @@
+# Outside code and environments, fetched by `nandini fetch` at pinned commits (see nandini/config.py)
+/external/
+
+# Default output folders of the commands (anchored: nandini/training/ is code)
+/out/
+/inventory/
+/pitch_shift/
+/training/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+*.egg-info/
