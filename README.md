@@ -14,23 +14,23 @@ Nandinī is made in two parts:
 
 ### Making the dataset
 
-![How each clip is made: up to 10 attempts of voice conversion, melody step and recogniser check per verse](docs/dataset_pipeline.png)
+![How each clip is made: up to 10 candidates per verse, each a voice conversion, melody step and recogniser check](docs/dataset_pipeline.png)
 
-Each verse goes through up to 10 attempts (`nandini generate`):
+Each verse gets up to 10 candidates (`nandini generate`):
 
 - **Voice conversion:** a voice converter (IndicVoiceChanger) turns Vāgdhenu's recording into the voice of a 25 s
-  sample. Each attempt uses its own fixed seed, so every run makes the same conversions.
+  sample. Each candidate uses its own fixed seed, so every run makes the same conversions.
 - **Melody step:** the converter keeps the new voice but drifts from the chant's pitch, so the clip is resynthesised
   with WORLD on Vāgdhenu's pitch, raised by k semitones (one k per chant style: +6.74 and +6.58), with his voicing and
   loudness. His timing is kept as it is.
 - **Recogniser check:** [Su-śrotā](https://huggingface.co/prathoshap/sushrota-sanskrit-asr) transcribes both the clip
   and Vāgdhenu's recording. An **error** is a syllable it hears right in his recording and wrong in the clip, so its
   own mistakes on his chant aren't counted against the clip.
-- **Keep or retry:** the first attempt with at most 1 error is kept; if none of the 10 gets there, the one with the
+- **Keep or retry:** the first candidate with at most 1 error is kept; if none of the 10 gets there, the one with the
   fewest errors.
 - **Re-check in halves** (`nandini recheck-halves`): on long verses the recogniser can lose its place and misread a
-  whole stretch of a good clip. So each verse that missed has its 10 attempts checked again, with each half verse
-  transcribed on its own. If an attempt now has at most 1 error, the first such attempt replaces the kept one.
+  whole stretch of a good clip. So each verse that missed has its 10 candidates checked again, with each half verse
+  transcribed on its own. If a candidate now has at most 1 error, the first such candidate replaces the kept one.
 
 All 1,467 verses are kept, so the dataset has the same verses, styles and meters as Vāgdhenu's: 1,298 (88.5%) with at
 most 1 syllable wrong.
@@ -92,7 +92,7 @@ Everything runs through one command, `nandini`, with every setting in one file, 
 | `manifests/pitch_shift_verses.csv` | the 61 verses the target voice read to measure k |
 | `manifests/inventory_sample_clips.csv` | a 61-clip sample, stratified by meter within each style, for the inventory |
 | `manifests/training_check_verses.csv` | the 10 verses the checks after training render (seed 20261109) |
-| `manifests/released_kept.csv` | the kept attempt of every verse in the released dataset, as training used it |
+| `manifests/released_kept.csv` | the kept candidate of every verse in the released dataset, as training used it |
 | `manifests/female_bank_overrides.csv` | the bank entries changed by hand, with reasons |
 | `manifests/test_verses.csv` | 60 new verses for evaluation, outside the dataset, from the Digital Corpus of Sanskrit (CC BY 4.0; [Test verses](#test-verses)) |
 | `manifests/test_verses_pool.csv`, `test_verses_report.md` | every candidate verse with its checks, and how the 60 were drawn |
@@ -173,7 +173,7 @@ The same code, seeds and package versions give the same choices and nearly the s
 identical files. Conversions differ slightly between GPUs, and between a GPU and Apple silicon. Even the melody step,
 which runs on the CPU, differs between Linux and macOS: re-making 610 clips on a Mac from the same conversions changed
 the level of 21 of them by more than 0.1 dB, with the same package versions. So a rerun on other hardware can keep a
-different attempt for some verses, or count an error more or fewer. Results on the same machine and environment are
+different candidate for some verses, or count an error more or fewer. Results on the same machine and environment are
 identical. The released audio was made on an NVIDIA A40 under Linux.
 
 ## Getting the recordings
@@ -217,7 +217,7 @@ nandini generate
 By default it runs every verse (`manifests/all_clips.csv`) into `out/`, with the settings in `nandini/config.py`.
 `nandini config` prints them.
 
-Attempt j converts the recording with seed 1000 · j + the verse's index, where the index is the verse's fixed position
+Candidate j converts the recording with seed 1000 · j + the verse's index, where the index is the verse's fixed position
 in the whole dataset. It then applies the melody step, which:
 - uses Vāgdhenu's pitch raised k semitones, with its voicing;
 - follows Vāgdhenu's frame energy, but caps any frame's boost at 6 dB above the clip's typical gain, which stops near-silent
@@ -227,8 +227,8 @@ in the whole dataset. It then applies the melody step, which:
 Outputs:
 - `out/final/<style>__<clip>.wav`: the kept clip for each verse.
 - `out/settings_part*.json`: the settings the run used.
-- `out/attempts_part*.csv`: every attempt, with its seed and errors.
-- `out/kept_part*.csv`: one row per verse, with the kept attempt, its errors, the attempts used, and whether it met the
+- `out/attempts_part*.csv`: every candidate, with its seed and errors. The output files and columns call a candidate an *attempt* (`attempts`, `kept_j`).
+- `out/kept_part*.csv`: one row per verse, with the kept candidate, its errors, the candidates used, and whether it met the
   bar.
 
 Every conversion and melody-step file is kept under `out/conversions/` and `out/melody/`.
@@ -239,13 +239,13 @@ Then re-check the verses that missed:
 nandini recheck-halves
 ```
 
-Each verse that missed the bar has its attempts on disk checked again in halves (below), against Vāgdhenu's recording
-checked the same way. The selection rule runs again on these scores: if an attempt now has at most 1 error, the first
-such attempt is kept instead; otherwise the verse keeps what `generate` kept. Verses that met the bar aren't touched.
-- `out/recheck_halves.csv`: every recording and attempt re-checked, with its errors in halves.
+Each verse that missed the bar has its candidates on disk checked again in halves (below), against Vāgdhenu's recording
+checked the same way. The selection rule runs again on these scores: if a candidate now has at most 1 error, the first
+such candidate is kept instead; otherwise the verse keeps what `generate` kept. Verses that met the bar aren't touched.
+- `out/recheck_halves.csv`: every recording and candidate re-checked, with its errors in halves.
 - `out/kept_rechecked.csv`: the final kept list, one row per verse, with `scoring` (`whole` or `halves`) and `generate`'s choice
   beside it (`whole_kept_j`, `whole_errors`, `whole_counted`). Later commands read this file when it's there.
-- `out/final/`: the clip is replaced where the kept attempt changed.
+- `out/final/`: the clip is replaced where the kept candidate changed.
 
 Options:
 - `--part i/P` splits the run into P parallel parts.
@@ -255,7 +255,7 @@ Options:
   scored whole clips and re-checked only the verses that missed.
 
 **Scoring in halves:** on some long verses Su-śrotā drops a stretch of a whole clip (verse 1343 reads with 16 or more
-errors whole and 1 in halves), which wrongly marks good attempts as bad. In halves, every recording and attempt is cut
+errors whole and 1 in halves), which wrongly marks good candidates as bad. In halves, every recording and candidate is cut
 at the half-verse pause, each half is transcribed alone, and the two transcripts are
 joined and scored against the whole verse as before. The pause is found from Vāgdhenu's recording (the start of
 syllable n // 2, to 10 ms) and moved to the quietest 20 ms nearby in each clip. Errors, the bar and the rule are unchanged. It
@@ -263,23 +263,23 @@ costs two transcriptions per clip, plus one timed transcription of Vāgdhenu's r
 
 **How the released audio was made:**
 - **Hardware:** one A40, with 4 parts in parallel.
-- **Run size:** 4,766 attempts for 1,467 verses (3.25 per verse) in about 19 hours.
+- **Run size:** 4,766 candidates for 1,467 verses (3.25 per verse) in about 19 hours.
 - **Result:** 1,212 verses (82.6%) met the bar, 492 of them with no errors; the other 255 are kept with their best of
   10.
-- **Error rate:** 2.19% of counted syllables are wrong. This count comes from the same ASR that chose each attempt, so
+- **Error rate:** 2.19% of counted syllables are wrong. This count comes from the same ASR that chose each candidate, so
   it is optimistic.
-- **Re-check in halves:** the 255 verses that missed were checked again in halves, on the same 10 attempts. 86 then had
-  an attempt with at most 1 error, and took the first such attempt (55 a different attempt, 31 the same one); the
+- **Re-check in halves:** the 255 verses that missed were checked again in halves, on the same 10 candidates. 86 then had
+  a candidate with at most 1 error, and took the first such candidate (55 a different candidate, 31 the same one); the
   other 169 kept their best of 10. Result: 1,298 verses (88.5%) at the bar, and 1.97% of counted syllables wrong (a
   mix of whole and halves scoring).
 - **The released kept list:** `manifests/released_kept.csv`, in the format of `out/kept_rechecked.csv`. Training used it. A
-  rerun on other hardware can keep a different attempt for some verses ([Same results, not identical
+  rerun on other hardware can keep a different candidate for some verses ([Same results, not identical
   audio](#same-results-not-identical-audio)), so `--kept manifests/released_kept.csv` trains on exactly the released
   choice.
 
 **Why at most 1 error, not 0:** Su-śrotā misreads about 4.7% of syllables on Vāgdhenu's own recordings, so a single
 error in a verse (about 2% of a typical 46-syllable verse) is within the judge's own noise. On the 61-clip sample, a
-0-error rule needed about 1.7 times the attempts and lowered the error rate only from 2.1% to 1.7%.
+0-error rule needed about 1.7 times the candidates and lowered the error rate only from 2.1% to 1.7%.
 
 ## Checking the dataset
 
@@ -367,7 +367,7 @@ nandini pitch-shift report               # k per style with bootstrap intervals 
 **The selection rule and the melody step**, on the inventory's clips (`nandini inventory convert` and `score`):
 
 ```bash
-nandini selection simulate               # the rule on the inventory's attempts -> inventory/selection/
+nandini selection simulate               # the rule on the inventory's candidates -> inventory/selection/
 nandini selection threshold              # stopping at ≤ 1 error against 0, and Su-śrotā's misreads on Vāgdhenu
 nandini melody-checks timing             # voicing-based timing check (inconclusive on chant; see its report)
 nandini melody-checks voicing            # where the melody step imposes Vāgdhenu's voicing
@@ -594,7 +594,7 @@ nandini test-verses    # rebuilds manifests/test_verses*.csv (training environme
 
 Every setting is in `nandini/config.py`, with a comment on each:
 - the pinned dataset and model revisions; diffusion steps (30) and guidance (0.7);
-- at most 10 attempts per verse, their seeds (seed step 1000), and at most 1 error to stop;
+- at most 10 candidates per verse, their seeds (seed step 1000), and at most 1 error to stop;
 - k per style (+6.74 semitones for style_a, +6.58 for style_b; each is the gap between Vāgdhenu's mean log pitch and
   the female voice's own reading of the same verses);
 - the WORLD frame step and pitch range, and the energy boost cap (6 dB);
@@ -625,7 +625,7 @@ About 6 seconds, offline, with no models loaded. They check that:
 - the training commands say what to make when the training environment is missing;
 - the check verses are the seed-20261109 draw, and a bank cut keeps the syllables that start inside it.
 
-A full check needs the models and Seed-VC: `nandini generate --indices 389 --out check ...` should keep attempt 0 with 1 error, as in the released run. On the same machine and environment the audio is identical sample for sample; across GPUs, conversions can differ slightly.
+A full check needs the models and Seed-VC: `nandini generate --indices 389 --out check ...` should keep candidate 0 with 1 error, as in the released run. On the same machine and environment the audio is identical sample for sample; across GPUs, conversions can differ slightly.
 
 ## The voice sample
 

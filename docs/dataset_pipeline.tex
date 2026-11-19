@@ -7,7 +7,7 @@
 \usepackage{amsmath}
 \usepackage{xcolor}
 \usepackage{tikz}
-\usetikzlibrary{positioning,arrows.meta,calc,fit,backgrounds,shadows}
+\usetikzlibrary{positioning,arrows.meta,calc,fit,backgrounds,shadows,shapes.geometric}
 \begin{document}
 \begin{tikzpicture}[
   font=\footnotesize,
@@ -29,20 +29,20 @@
 \node[input] (rec)   at (58,0)  {\textbf{Reciter's recording}\\the chant to convert};
 \node[input] (text)  at (116,0) {\textbf{Verse text}\\what should be heard};
 
-% One attempt: conversion, melody step, recogniser, decision
-\node[conv, text width=40mm] (vc)     at (0,-22)  {\textbf{Voice conversion}\\a new seed each attempt};
+% One candidate: conversion, melody step, recogniser, decision
+\node[conv, text width=40mm] (vc)     at (0,-22)  {\textbf{Voice conversion}\\a new seed each candidate};
 \node[his, text width=40mm]  (world)  at (58,-22) {\textbf{Reciter's melody}\\pitch raised $k$ semitones,\\with voicing and loudness};
 \node[box, line width=0.7pt, text width=70mm] (melody) at (29,-44)
   {\textbf{Melody step}\\the new voice resynthesised (WORLD) on the reciter's melody and loudness};
 \node[box, text width=118mm] (asr) at (58,-64)
   {\textbf{Recogniser check}\\an error is a syllable heard right in the recording but wrong in the clip};
-\node[keep, text width=30mm] (decide) at (58,-84) {\textbf{At most 1 error?}};
+\node[keep, shape=diamond, aspect=2.6, text width=20mm, minimum height=0pt, inner sep=1pt, rounded corners=0pt] (decide) at (58,-84) {\textbf{At most 1 error?}};
 
 \begin{scope}[on background layer]
   \node[loopbg, fit=(vc)(melody)(asr)(decide), inner xsep=2.5mm, inner ysep=2.5mm] (loop) {};
 \end{scope}
 
-% Inputs into the attempt
+% Inputs into the candidate
 \draw[flow] (voice.south -| -6,0) -- (-6,-16);
 \draw[flow] (rec) -- node[side, pos=0.6]{chant} (world);
 \draw[flow] (58,-9.5) -| (6,-16);
@@ -57,10 +57,10 @@
 
 % Retry: next seed
 \draw[loopflow] (decide.west) -- (-26,-84) |- (vc.west);
-\node[lab, anchor=south west, text=red!65!black] at (-22,-83.3) {no: try again\\(up to 10 attempts per verse)};
+\node[lab, anchor=south west, text=red!65!black] at (-22,-83.3) {no: try again\\(up to 10 candidates per verse)};
 
-% Out of the attempts
-\node[keep, text width=34mm] (halves) at (-6,-110) {\textbf{Re-check in halves}\\all 10 attempts, each half verse heard alone};
+% Out of the candidates
+\node[keep, text width=34mm] (halves) at (-6,-110) {\textbf{Re-check in halves}\\all 10 candidates, each half verse heard alone};
 \node[input, minimum height=10mm] (clip) at (58,-110) {\textbf{Female clip}\\the reciter's chant, $k$ semitones higher};
 \node[box, dashed] (model) at (116,-110) {\textbf{Fine-tune IndicF5}\\Vāgdhenu's recipe};
 
