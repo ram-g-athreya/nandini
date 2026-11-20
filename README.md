@@ -48,6 +48,7 @@ uv run nandini chant --backend mlx --text "..."              # Apple silicon GPU
 - **The compact ONNX files** (344 MB) are an approximation of the full set: their renders differ from it about as much
   as another seed's do.
 - **From Python:** `nandini/chant.py` shows the renderer calls for each backend.
+- **In the browser:** `demo/` has a website and a Gradio app that chants in Nandinī's voice beside Vāgdhenu's.
 
 ## Making the dataset
 
@@ -144,6 +145,7 @@ uv sync --group test && uv run pytest      # about 6 s, offline, no models
 | `nandini/` | the code: one command, `nandini`, with every setting the release used in `nandini/config.py` (`nandini config` prints them) |
 | `manifests/` | clip lists, the released kept list, the 60 test verses |
 | `voice/` | the 25 s sample that sets the female voice |
+| `demo/` | the website and the live demo (a Gradio app for a Hugging Face Space) |
 | `scripts/` | one setup script per environment |
 | `third_party/` | pinned requirements for each environment, and a Seed-VC patch for Apple silicon |
 | `tests/` | quick offline checks (`pytest`) |

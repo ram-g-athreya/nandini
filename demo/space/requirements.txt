@@ -1,0 +1,20 @@
+# Hugging Face ZeroGPU Space. gradio comes from the Space SDK (README.md header); add gradio==5.49.1 to run locally.
+# The same stack as Vāgdhenu's own Space (demo/requirements.txt at his pinned commit): torch 2.8 for ZeroGPU,
+# IndicF5's own F5-TTS fork at the commit his model was trained with (not the PyPI f5-tts), numpy <= 1.26.4,
+# and datasets/pyarrow pinned as in the release's PyTorch environment.
+spaces
+torch==2.8.0
+torchaudio==2.8.0
+git+https://github.com/ai4bharat/IndicF5.git@13f7c4d627cc10111aea8fe9c0039462cacacdc7
+transformers==4.46.3
+accelerate==0.34.2
+vocos==0.1.0
+x-transformers==2.19.7
+numpy==1.26.4
+datasets==2.14.4    # IndicF5 imports it; newer pyarrow drops PyExtensionType, which this version uses
+pyarrow==20.0.0
+librosa==0.11.0
+scipy
+soundfile
+huggingface_hub
+indic-transliteration
