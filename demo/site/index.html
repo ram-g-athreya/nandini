@@ -130,9 +130,15 @@
   footer p{margin:.35rem auto;max-width:44em}
   footer strong{color:#5e4c56}
   @media(max-width:560px){h1{font-size:2.5rem}body{font-size:17px}.demo iframe{height:960px}}
+  /* a mandala in the bottom-right corner, only a quarter of it on screen, turned by scrolling (script below) */
+  .mandala{--mo:.42;position:fixed;right:-300px;bottom:-300px;width:600px;height:600px;z-index:0;pointer-events:none;
+      opacity:var(--mo);will-change:transform,opacity}
+  header.hero,.wrap{position:relative;z-index:1}
+  @media(max-width:640px){.mandala{--mo:.32;right:-190px;bottom:-190px;width:380px;height:380px}}
 </style>
 </head>
 <body>
+<img class="mandala" id="mandala" src="mandala.svg" alt="" aria-hidden="true">
 <header class="hero">
   <div class="wrap">
     <p class="sanskrit">॥ नन्दिनी ॥</p>
@@ -488,6 +494,28 @@
       paint();
     });
   });
+  // The corner mandala (mandala.svg, from make_mandala.py), turned with the scroll position: scrolling down turns it
+  // clockwise, scrolling up turns it back (still for visitors who ask for reduced motion). On narrow screens it fades
+  // out as the footer comes up, so it never sits under the footer's text.
+  (function(){
+    var svg = document.getElementById("mandala"), foot = document.querySelector("footer");
+    if (!svg) return;
+    var still = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches, queued = false;
+    function update(){
+      queued = false;
+      if (!still) svg.style.transform = "rotate(" + (window.scrollY * 0.06).toFixed(2) + "deg)";
+      var base = parseFloat(getComputedStyle(svg).getPropertyValue("--mo")) || 0.4, k = 1;
+      if (foot && window.innerWidth < 900) {
+        var top = foot.getBoundingClientRect().top, h = window.innerHeight;
+        k = Math.max(0, Math.min(1, (top - h * 0.45) / (h * 0.5)));
+      }
+      svg.style.opacity = (base * k).toFixed(3);
+    }
+    function queue(){ if (!queued){ queued = true; requestAnimationFrame(update); } }
+    window.addEventListener("scroll", queue, {passive: true});
+    window.addEventListener("resize", queue);
+    update();
+  })();
   // one player at a time
   document.addEventListener("play", function(e){
     document.querySelectorAll("audio").forEach(function(a){ if(a !== e.target) a.pause(); });
