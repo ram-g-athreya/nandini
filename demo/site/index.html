@@ -129,7 +129,7 @@
   footer{padding:2rem 0 3rem;color:var(--muted);font-size:.9rem;text-align:center}
   footer p{margin:.35rem auto;max-width:44em}
   footer strong{color:#5e4c56}
-  @media(max-width:560px){h1{font-size:2.5rem}body{font-size:17px}.demo iframe{height:960px}}
+  @media(max-width:560px){h1{font-size:2.5rem}body{font-size:17px}}
   /* a mandala in the bottom-right corner of large screens, only a quarter of it on screen; scrolling turns its
      three layers in alternating directions */
   .mandala{--mo:.42;position:fixed;right:-300px;bottom:-300px;width:600px;height:600px;z-index:0;pointer-events:none;
@@ -164,7 +164,7 @@
     <h2>Try it</h2>
     <p class="lead">Paste a Sanskrit verse in any Indian script — the meter is detected automatically.</p>
     <div class="demo">
-      <iframe id="demoframe" loading="lazy" allow="autoplay" title="Nandinī live demo"></iframe>
+      <iframe id="demoframe" allow="autoplay" scrolling="no" title="Nandinī live demo"></iframe>
       <div class="offline" id="offline">The live demo is resting right now.
         Meanwhile, <a href="#listen">listen to the sample chants</a> below.</div>
     </div>
@@ -386,22 +386,38 @@
 (function(){
   // The live demo: a Hugging Face Space (demo/space in the repository). Change SPACE if it is hosted elsewhere.
   // The page asks Hugging Face whether the Space exists, is up and has a GPU (a sleeping Space wakes when the frame
-  // loads); otherwise it shows a note instead of an error page.
+  // loads); if it is down it shows a note instead of an error page.
   var SPACE = "ramgathreya/nandini-demo";
   var DEMO = "https://" + SPACE.replace("/", "-").replace(/[._]/g, "-").toLowerCase() + ".hf.space/?__theme=light";
+  // Served locally (python -m http.server), the page embeds the app running locally (python demo/space/app.py)
+  var LOCAL = /^(localhost|127\.0\.0\.1)$/.test(location.hostname);
+  if (LOCAL) DEMO = "http://localhost:7860/?__theme=light";
   var frame = document.getElementById("demoframe");
   document.getElementById("demolink").href = DEMO;
+  // The Space page reports its height (it loads iframe-resizer's in-frame script), so the frame grows with the app
+  // and the page scrolls, not the app. RESIZER matches the version the Space loads.
+  var RESIZER = "https://cdnjs.cloudflare.com/ajax/libs/iframe-resizer/4.3.1/iframeResizer.min.js";
+  function embed(){
+    frame.src = DEMO;
+    var js = document.createElement("script");
+    js.src = RESIZER;
+    js.onload = function(){ window.iFrameResize({checkOrigin: false, warningTimeout: 0}, frame); };
+    document.head.appendChild(js);
+  }
   function down(){ frame.style.display = "none"; document.getElementById("offline").style.display = "block"; }
+  if (LOCAL) embed(); else
   fetch("https://huggingface.co/api/spaces/" + SPACE, {cache: "no-store"})
     .then(function(r){ return r.ok ? r.json() : null; })
     .then(function(d){
+      // no answer (rate limit, network): try the demo anyway; hide it only when Hugging Face says it is down
+      if (!d || !d.runtime) { embed(); return; }
       var stage = d && d.runtime && d.runtime.stage;
       var hw = (d && d.runtime && d.runtime.hardware && d.runtime.hardware.current) || "";
       // only a Space with a GPU: on a CPU one verse takes many minutes
       if (stage && !/ERROR|NO_APP_FILE|CONFIG_ERROR|PAUSED|STOPPED|DELETING/.test(stage) && hw && !/^cpu/.test(hw))
-        frame.src = DEMO; else down();
+        embed(); else down();
     })
-    .catch(down);
+    .catch(embed);
   // Seekable players: each clip is downloaded whole and played from memory (a blob URL), so the player can seek
   // anywhere even on servers that ignore Range requests. Clips load as their card comes near the screen.
   var blobs = {};

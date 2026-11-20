@@ -227,11 +227,14 @@ THEME = gr.themes.Soft(primary_hue=PLUM, secondary_hue="amber", neutral_hue="sto
     link_text_color="#9b2d5c", link_text_color_hover="#6e1d41", link_text_color_visited="#9b2d5c")
 CSS = """
 .gradio-container {max-width: 1100px !important}
+#intro {overflow: visible !important}  /* the title's line height spilled 1 px, giving the intro a scrollbar */
 #intro h1 {font-weight: 700; color: #6e1d41; letter-spacing: -0.01em}
 #verse textarea {font-family: 'Noto Serif Devanagari', 'Spectral', serif; font-size: 1.15rem; line-height: 1.9}
 .gallery {font-family: 'Spectral', 'Noto Serif Devanagari', serif}
 #chant-btn {font-size: 1.15rem; font-weight: 600}
 #advanced .label-wrap .icon {font-size: 0.7rem; color: #8c7b84}  /* the open/close arrow: smaller, as in Vāgdhenu's app */
+#voice .wrap {display: flex; width: 100%}
+#voice .wrap > label {flex: 1; justify-content: center}  /* the two voices share the full width */
 #samples > .label {display: none}  /* the examples' empty label still shows a list icon */
 """
 
@@ -242,17 +245,17 @@ with gr.Blocks(title="Nandinī — Sanskrit chant", theme=THEME, css=CSS) as dem
             txt = gr.Textbox(label="Your verse — one shloka at a time", value=SAMPLES[0][1], lines=4, elem_id="verse",
                              placeholder="Paste a single Sanskrit verse in any Indian script…")
             gr.Markdown(f"<sub>One shloka per chant · up to {limits.DAILY_LIMIT} chants per day.</sub>")
-            voice = gr.Radio([NANDINI, BOTH], value=NANDINI, label="Voice")
-            with gr.Accordion("⚙️ Advanced (optional)", open=False, elem_id="advanced"):
-                meter = gr.Dropdown(METER_CHOICES, value=AUTO, label="Meter (chandas)",
-                                    info="Leave on Auto-detect unless you know the meter.")
-                seed = gr.Slider(0, 1000, value=SEED, step=1, label="Seed",
-                                 info="Change it for a different take of the same verse.")
-            btn = gr.Button("🎧 Chant it", variant="primary", size="lg", elem_id="chant-btn")
         with gr.Column(scale=2):
             out_n = gr.Audio(label="Nandinī", type="numpy", autoplay=False)
             out_v = gr.Audio(label="Vāgdhenu", type="numpy", autoplay=False, visible=False)
             status = gr.Markdown("")
+    voice = gr.Radio([NANDINI, BOTH], value=NANDINI, label="Voice", elem_id="voice")
+    with gr.Accordion("⚙️ Advanced (optional)", open=False, elem_id="advanced"):
+        meter = gr.Dropdown(METER_CHOICES, value=AUTO, label="Meter (chandas)",
+                            info="Leave on Auto-detect unless you know the meter.")
+        seed = gr.Slider(0, 1000, value=SEED, step=1, label="Seed",
+                         info="Change it for a different take of the same verse.")
+    btn = gr.Button("🎧 Chant it", variant="primary", size="lg", elem_id="chant-btn")
     voice.change(_show, voice, out_v)
     btn.click(chant, [txt, voice, meter, seed], [out_n, out_v, status])
     gr.Markdown("### 📜 Sample shlokas — click one to load it, then press **Chant it**\n"
