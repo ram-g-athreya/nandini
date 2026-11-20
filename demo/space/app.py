@@ -15,6 +15,7 @@ import json
 import os
 import subprocess
 import sys
+import time
 
 import gradio as gr
 
@@ -122,6 +123,9 @@ def _assets(voice):
             hf_hub_download(VAGDHENU_HF, VAGDHENU_FILES["vocoder"], revision=VAGDHENU_REV), HIS_BANK)
 
 
+_ASSETS = {v: _assets(v) for v in (NANDINI, VAGDHENU)}  # downloaded once at startup, off the GPU
+
+
 def _device():
     import torch
     if torch.cuda.is_available():
@@ -132,7 +136,7 @@ def _device():
 def _renderer(voice):
     if voice not in _RENDERERS:
         from render_core import Renderer
-        v, voc, bank = _assets(voice)
+        v, voc, bank = _ASSETS[voice]
         _RENDERERS[voice] = Renderer(v, voc, bank, device=_device(), vocab_file=VOCAB)
     return _RENDERERS[voice]
 
@@ -148,15 +152,14 @@ def _meter(text, choice):
                       f"or choose the meter under Advanced.")
 
 
-@GPU(duration=120)
+# ZeroGPU charges each call for the time it asks for, against a small daily allowance per visitor, so ask for
+# little: a verse takes about 20 s on the GPU, the first one included (measured on this Space).
+@GPU(duration=45)
 def _render_one(voice, text, meter, seed):
-    return _renderer(voice).render_one(text, meter, seed=int(seed))
-
-
-@GPU(duration=200)
-def _render_both(text, meter, seed):
-    return (_renderer(NANDINI).render_one(text, meter, seed=int(seed)),
-            _renderer(VAGDHENU).render_one(text, meter, seed=int(seed)))
+    t = time.time()
+    out = _renderer(voice).render_one(text, meter, seed=int(seed))
+    print(f"rendered {voice}: {len(out[1]) / out[0]:.1f} s of audio in {time.time() - t:.1f} s", flush=True)
+    return out
 
 
 def chant(text, voice, meter_choice, seed, request: gr.Request):
@@ -171,10 +174,14 @@ def chant(text, voice, meter_choice, seed, request: gr.Request):
     meter, status = _meter(text, meter_choice)
     try:
         if voice == BOTH:
-            n, v = _render_both(text, meter, seed)
+            # one GPU call per voice: ZeroGPU limits how long a visitor's single call may ask for
+            n, v = _render_one(NANDINI, text, meter, seed), _render_one(VAGDHENU, text, meter, seed)
         else:
             n, v = _render_one(NANDINI, text, meter, seed), None
     except Exception as e:
+        if "quota" in str(e).lower():
+            raise gr.Error("Today's free GPU time for your connection is used up. Please try again tomorrow, or sign in "
+                           "to Hugging Face on this page for more.")
         raise gr.Error(f"Sorry, rendering failed: {e}")
     return n, v, status
 
