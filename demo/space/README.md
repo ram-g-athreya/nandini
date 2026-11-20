@@ -8,7 +8,7 @@ sdk_version: 5.49.1
 app_file: app.py
 pinned: false
 license: apache-2.0
-short_description: Sanskrit verse to chant, in Nandinī's female voice or beside Vāgdhenu's
+short_description: Sanskrit verse to chant in a female voice
 ---
 
 # Nandinī — Sanskrit chant in a female voice (demo)
