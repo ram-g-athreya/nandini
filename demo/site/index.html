@@ -3,17 +3,17 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Nandinī — A Female Voice for Sanskrit Chant</title>
-<meta name="description" content="Nandinī gives Vāgdhenu, a meter-aware Sanskrit chant synthesiser, a female voice, built from Vāgdhenu's own recordings without recording a female reciter.">
-<meta property="og:title" content="Nandinī — A Female Voice for Sanskrit Chant">
-<meta property="og:description" content="Hear Sanskrit verses chanted in a female voice, beside Vāgdhenu's. Try the live demo, listen to samples, run it yourself.">
+<title>Nandinī — Sanskrit Chant in a Female Voice</title>
+<meta name="description" content="Paste a Sanskrit verse in any Indian script and hear it chanted in its meter, in a female voice. Free and open, built on Vāgdhenu.">
+<meta property="og:title" content="Nandinī — Sanskrit Chant in a Female Voice">
+<meta property="og:description" content="Paste a Sanskrit verse in any Indian script and hear it chanted in its meter, in a female voice.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Noto+Serif+Devanagari:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root{
     --ink:#2b1f26; --soft:#6b5a63; --muted:#8c7b84; --accent:#9b2d5c; --deep:#6e1d41; --gold:#b8862f;
-    --line:#eddfe5; --bg:#fdf9fa; --card:#ffffff; --tint:#fbeef3; --vtint:#f7efe4; --v:#8a5a1f;
+    --line:#eddfe5; --bg:#fdf9fa; --card:#ffffff; --tint:#fbeef3; --v:#8a5a1f; --vtint:#f7efe4;
   }
   *{box-sizing:border-box}
   html{scroll-behavior:smooth}
@@ -22,29 +22,38 @@
   .wrap{max-width:820px;margin:0 auto;padding:0 1.3rem}
   a{color:var(--accent);text-decoration:none}
   a:hover{text-decoration:underline}
+
+  /* hero */
   header.hero{background:radial-gradient(1200px 380px at 50% -120px,#f8dbe6 0%,rgba(248,219,230,0) 70%),
       linear-gradient(170deg,#fcf0f4 0%,#faeaf0 55%,var(--bg) 100%);border-bottom:1px solid var(--line);
       text-align:center;padding:3.6rem 1.3rem 2.7rem}
   .sanskrit{font-family:'Noto Serif Devanagari',serif;color:var(--gold);font-size:1.35rem;letter-spacing:.03em;margin:0 0 .35rem}
   h1{font-size:3.3rem;line-height:1;margin:.1rem 0 .5rem;font-weight:700;color:var(--deep);letter-spacing:-.02em}
-  .tag{font-size:1.22rem;font-style:italic;color:#5e4c56;margin:.2rem auto 1.1rem;max-width:31em}
+  .tag{font-size:1.22rem;font-style:italic;color:#5e4c56;margin:.2rem auto .5rem;max-width:30em}
+  .by{color:var(--soft);font-size:1rem;margin:0 0 .9rem}
   .disclaimer{display:inline-block;margin:0 auto 1.4rem;padding:.55rem .95rem;background:rgba(155,45,92,.06);
-      border:1px solid #e6c2d2;border-radius:10px;color:var(--deep);font-size:.9rem;max-width:36em;line-height:1.55;text-align:left}
+      border:1px solid #e6c2d2;border-radius:10px;color:var(--deep);font-size:.9rem;max-width:34em;line-height:1.55;text-align:left}
+  .disclaimer strong{color:var(--accent)}
   .pills{display:flex;flex-wrap:wrap;gap:.5rem;justify-content:center;margin-top:.4rem}
   .pill{display:inline-block;padding:.42rem .95rem;border:1px solid #e3c4d2;border-radius:999px;background:rgba(255,255,255,.6);
       color:var(--deep);font-size:.95rem;font-weight:500;transition:all .15s ease}
   .pill:hover{background:var(--accent);color:#fff;border-color:var(--accent);text-decoration:none}
   .pill.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
   .pill.primary:hover{background:var(--deep);border-color:var(--deep)}
+
   section{padding:2.6rem 0}
   section + section{border-top:1px solid #f3e8ec}
   h2{font-size:.92rem;text-transform:uppercase;letter-spacing:.14em;color:var(--accent);font-weight:600;margin:0 0 .3rem}
   h2 + .lead{color:var(--soft);margin:.1rem 0 1.3rem;font-style:italic}
   p{margin:.7rem 0}
+  .note{font-size:.9rem;color:var(--muted);margin:.7rem 2px 0}
+
+  /* live demo */
   .demo{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:#fff;box-shadow:0 10px 30px -18px rgba(110,29,65,.35)}
   .demo iframe{display:block;width:100%;height:900px;border:0}
-  .demo .offline{display:none;padding:2rem 1.5rem;text-align:center;color:var(--soft)}
-  .note{font-size:.9rem;color:var(--muted);margin:.6rem 2px 0}
+  .demo .offline{display:none;padding:2.2rem 1.5rem;text-align:center;color:var(--soft)}
+
+  /* sample chants */
   .clips{display:grid;grid-template-columns:repeat(2,1fr);gap:1rem}
   @media(max-width:640px){.clips{grid-template-columns:1fr}}
   .clip{margin:0;background:#fff;border:1px solid var(--line);border-radius:12px;padding:1.05rem 1.15rem;
@@ -53,31 +62,72 @@
   .badge{font-style:italic;font-weight:600;color:#fff;background:var(--accent);padding:.16rem .7rem;border-radius:999px;font-size:.92rem}
   .src{color:var(--muted);font-size:.9rem}
   .verse{font-family:'Noto Serif Devanagari',serif;font-size:1.08rem;line-height:1.95;color:#332630;margin:.6rem 0 .8rem;flex:1}
-  .pair{display:grid;grid-template-columns:auto 1fr;gap:.35rem .6rem;align-items:center}
-  .who{font-size:.85rem;font-weight:600;padding:.1rem .55rem;border-radius:6px;text-align:center}
-  .who.n{background:var(--tint);color:var(--deep)}
-  .who.v{background:var(--vtint);color:var(--v)}
-  audio{width:100%;height:38px}
-  .steps{counter-reset:s;list-style:none;padding:0;margin:1rem 0}
-  .steps li{counter-increment:s;position:relative;padding:0 0 .8rem 2.4rem}
-  .steps li::before{content:counter(s);position:absolute;left:0;top:.1rem;width:1.7rem;height:1.7rem;border-radius:50%;
-      background:var(--tint);color:var(--deep);font-weight:600;font-size:.9rem;display:flex;align-items:center;justify-content:center}
-  figure.diagram{margin:1.2rem 0;text-align:center}
-  figure.diagram img{max-width:100%;border:1px solid var(--line);border-radius:10px;background:#fff}
-  figure.diagram figcaption{font-size:.88rem;color:var(--muted);margin-top:.4rem}
-  .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:.8rem;margin:1.2rem 0}
-  @media(max-width:640px){.stats{grid-template-columns:1fr}}
-  .stat{background:#fff;border:1px solid var(--line);border-radius:12px;padding:.9rem 1rem}
-  .stat .big{font-size:1.6rem;font-weight:700;color:var(--deep);line-height:1.2}
-  .stat .what{font-size:.9rem;color:var(--soft)}
-  pre{background:#2b1f26;color:#f6e9ef;border-radius:10px;padding:1rem 1.1rem;overflow-x:auto;font-size:.82rem;line-height:1.55}
-  code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
-  p code,li code{background:var(--tint);padding:.05rem .35rem;border-radius:4px;font-size:.85em}
-  ul.plain{padding-left:1.2rem}
-  ul.plain li{margin:.35rem 0}
-  .copy{float:right;font-family:'Spectral',serif;font-size:.8rem;border:1px solid #6b5a63;background:transparent;color:#f6e9ef;
-      border-radius:6px;padding:.1rem .5rem;cursor:pointer}
-  footer{padding:2rem 0 3rem;color:var(--muted);font-size:.92rem;text-align:center}
+  /* one player per verse, with a two-way voice switch; the panel takes the chosen voice's colour */
+  .player{border-radius:12px;padding:.45rem;background:var(--tint);transition:background .2s ease}
+  .player.v{background:var(--vtint)}
+  .voices{display:grid;grid-template-columns:1fr 1fr;gap:.35rem;margin-bottom:.45rem}
+  .voices button{font:inherit;border:1px solid transparent;background:transparent;border-radius:9px;padding:.35rem .5rem;
+      cursor:pointer;text-align:center;line-height:1.25;color:var(--soft);transition:all .15s ease}
+  .voices button:hover{background:rgba(255,255,255,.55)}
+  .voices button b{display:block;font-size:.98rem;font-weight:600}
+  .voices button small{display:block;font-size:.78rem;opacity:.85}
+  .voices button.on{background:#fff;box-shadow:0 2px 8px -4px rgba(0,0,0,.3)}
+  .voices button.on[data-voice="n"]{color:var(--deep);border-color:#e6c2d2}
+  .voices button.on[data-voice="v"]{color:var(--v);border-color:#e3d0b4}
+  .voices button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+  /* the player: play button, seek bar and time, in the chosen voice's colour (--c) */
+  .player{--c:var(--accent)}
+  .player.v{--c:var(--v)}
+  .ctl{display:flex;align-items:center;gap:.7rem;background:#fff;border-radius:10px;padding:.45rem .8rem .45rem .45rem}
+  .play{flex:none;width:2.4rem;height:2.4rem;border-radius:50%;border:0;background:var(--c);color:#fff;cursor:pointer;
+      display:flex;align-items:center;justify-content:center;transition:transform .1s ease,background .2s ease;padding:0}
+  .play:hover{transform:scale(1.06)}
+  .play:focus-visible{outline:2px solid var(--c);outline-offset:2px}
+  .play svg{width:1rem;height:1rem;fill:currentColor}
+  .play .i-pause{display:none}
+  .play.on .i-play{display:none}
+  .play.on .i-pause{display:block}
+  .seek{flex:1;min-width:0;-webkit-appearance:none;appearance:none;height:6px;border-radius:999px;cursor:pointer;margin:0;
+      background:linear-gradient(var(--c),var(--c)) 0/var(--p,0%) 100% no-repeat,#ecdfe4}
+  .player.v .seek{background:linear-gradient(var(--c),var(--c)) 0/var(--p,0%) 100% no-repeat,#ece3d6}
+  .seek::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:var(--c);
+      border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.3)}
+  .seek::-moz-range-thumb{width:14px;height:14px;border-radius:50%;background:var(--c);border:2px solid #fff;
+      box-shadow:0 1px 3px rgba(0,0,0,.3)}
+  .seek:focus-visible{outline:2px solid var(--c);outline-offset:4px}
+  .time{flex:none;font-size:.85rem;color:var(--soft);font-variant-numeric:tabular-nums;min-width:5.6em;text-align:right}
+  audio{display:none}
+  /* syllables light up as they are chanted; a click on one plays from there */
+  .clip{--c:var(--accent);--ct:var(--tint)}
+  .clip.v{--c:var(--v);--ct:var(--vtint)}
+  .verse .sy{border-radius:4px;transition:background .12s ease,color .12s ease;cursor:pointer;
+      box-decoration-break:clone;-webkit-box-decoration-break:clone}
+  .verse .sy:hover{background:var(--ct);box-shadow:0 0 0 2px var(--ct)}
+  .verse.going .sy{color:#a3949b}
+  .verse.going .sy.done{color:#332630}
+  .verse .sy.now{background:var(--c);color:#fff;box-shadow:0 0 0 2px var(--c)}
+
+  /* what it does */
+  .features{display:grid;grid-template-columns:repeat(2,1fr);gap:1rem}
+  @media(max-width:640px){.features{grid-template-columns:1fr}}
+  .feature{background:#fff;border:1px solid var(--line);border-radius:12px;padding:1rem 1.15rem}
+  .feature h3{margin:0 0 .25rem;font-size:1.05rem;color:var(--deep)}
+  .feature p{margin:0;color:var(--soft);font-size:.97rem}
+
+  /* built on Vāgdhenu */
+  .appcard{background:radial-gradient(900px 260px at 50% -80px,#f7e8d2 0%,rgba(247,232,210,0) 70%),#fff;
+      border:1px solid var(--line);border-radius:14px;padding:1.7rem 1.5rem;text-align:center;
+      box-shadow:0 10px 30px -18px rgba(110,29,65,.35)}
+  .app-sanskrit{font-family:'Noto Serif Devanagari',serif;color:var(--gold);font-size:1.18rem;margin:0 0 .15rem}
+  .app-name{font-size:1.95rem;color:var(--v);font-weight:700;margin:.1rem 0 .55rem;letter-spacing:-.01em}
+  .app-desc{color:#5e4c56;max-width:34em;margin:.2rem auto 1.15rem}
+  .appcard .pill{color:var(--v);border-color:#e3d0b4}
+  .appcard .pill:hover{background:var(--v);border-color:var(--v);color:#fff}
+  .appcard .pill.primary{background:var(--v);border-color:var(--v);color:#fff}
+  .appcard .pill.primary:hover{background:#6b4416;border-color:#6b4416}
+
+  footer{padding:2rem 0 3rem;color:var(--muted);font-size:.9rem;text-align:center}
+  footer p{margin:.35rem auto;max-width:44em}
   footer strong{color:#5e4c56}
   @media(max-width:560px){h1{font-size:2.5rem}body{font-size:17px}.demo iframe{height:960px}}
 </style>
@@ -87,15 +137,15 @@
   <div class="wrap">
     <p class="sanskrit">॥ नन्दिनी ॥</p>
     <h1>Nandinī</h1>
-    <p class="tag">A female voice for Vāgdhenu's Sanskrit chant, built from its own recordings without recording a female reciter.</p>
-    <p class="disclaimer">⚠ For classical (non-Vedic) verse only. Remove accent and other diacritical marks before pasting the text.</p>
+    <p class="tag">Sanskrit verses chanted in their meter, in a female voice.</p>
+    <p class="by">A companion voice for <a href="https://prathosh.in/vagdhenu/">Vāgdhenu</a></p>
+    <p class="disclaimer">⚠ Please use it only for <strong>non-Vedic chants</strong>, and remove all diacritical marks
+      before pasting the text.</p>
     <div class="pills">
       <a class="pill primary" href="#try">Try it</a>
       <a class="pill" href="#listen">Listen</a>
-      <a class="pill" href="#how">How it was made</a>
-      <a class="pill" href="#run">Run it yourself</a>
       <a class="pill" href="https://github.com/ram-g-athreya/nandini">Code</a>
-      <a class="pill" href="https://huggingface.co/ramgathreya/nandini">Model</a>
+      <a class="pill" href="https://huggingface.co/ramgathreya/nandini">Weights</a>
       <a class="pill" href="https://huggingface.co/datasets/ramgathreya/nandini-data">Dataset</a>
     </div>
   </div>
@@ -104,178 +154,224 @@
 <div class="wrap">
   <section id="try">
     <h2>Try it</h2>
-    <p class="lead">Paste a Sanskrit verse in any Indian script and choose a voice: Nandinī, Vāgdhenu, or both side by side.</p>
+    <p class="lead">Paste a Sanskrit verse in any Indian script — the meter is detected automatically.</p>
     <div class="demo">
       <iframe id="demoframe" loading="lazy" allow="autoplay" title="Nandinī live demo"></iframe>
-      <div class="offline" id="offline">The live demo isn't reachable right now. You can still
-        <a href="#listen">listen to the samples</a> or <a href="#run">run Nandinī yourself</a>.</div>
+      <div class="offline" id="offline">The live demo is resting right now.
+        Meanwhile, <a href="#listen">listen to the sample chants</a> below.</div>
     </div>
-    <p class="note">The first chant takes a minute or two while the models load. If the demo doesn't appear, open it
-      <a id="demolink" target="_blank" rel="noopener">in its own tab&nbsp;↗</a>.</p>
+    <p class="note">The first chant takes a minute or two while the voice warms up. You can hear Nandinī, Vāgdhenu, or
+      both side by side. If the demo doesn't load, open it <a id="demolink" target="_blank" rel="noopener">in its own tab&nbsp;↗</a>.</p>
   </section>
 
   <section id="listen">
-    <h2>Listen</h2>
-    <p class="lead">Vāgdhenu's six sample verses, chanted by Nandinī and by Vāgdhenu.</p>
+    <h2>Listen — sample chants</h2>
+    <p class="lead">Ten verses in seven meters. Each one in Nandinī's voice, and in Vāgdhenu's to compare.</p>
     <div class="clips">
       <figure class="clip">
         <div class="clip-head"><span class="badge">vasantatilakā</span><span class="src">Mahābhārata Tātparya Nirṇaya · 1.1</span></div>
-        <p class="verse">नारायणाय परिपूर्णगुणार्णवाय विश्वोदयस्थितिलयोन्नियतिप्रदाय ।<br>ज्ञानप्रदाय विबुधासुरसौख्यदुःखसत्कारणाय वितताय नमोनमस्ते</p>
-        <div class="pair">
-          <div class="who n">Nandinī</div><audio controls preload="none" src="audio/demo1_nandini.mp3"></audio>
-          <div class="who v">Vāgdhenu</div><audio controls preload="none" src="audio/demo1_vagdhenu.mp3"></audio>
+        <p class="verse"><span class="sy">ना</span><span class="sy">रा</span><span class="sy">य</span><span class="sy">णा</span><span class="sy">य</span> <span class="sy">प</span><span class="sy">रि</span><span class="sy">पू</span><span class="sy">र्ण</span><span class="sy">गु</span><span class="sy">णा</span><span class="sy">र्ण</span><span class="sy">वा</span><span class="sy">य</span> <span class="sy">वि</span><span class="sy">श्वो</span><span class="sy">द</span><span class="sy">य</span><span class="sy">स्थि</span><span class="sy">ति</span><span class="sy">ल</span><span class="sy">यो</span><span class="sy">न्नि</span><span class="sy">य</span><span class="sy">ति</span><span class="sy">प्र</span><span class="sy">दा</span><span class="sy">य</span> ।<br><span class="sy">ज्ञा</span><span class="sy">न</span><span class="sy">प्र</span><span class="sy">दा</span><span class="sy">य</span> <span class="sy">वि</span><span class="sy">बु</span><span class="sy">धा</span><span class="sy">सु</span><span class="sy">र</span><span class="sy">सौ</span><span class="sy">ख्य</span><span class="sy">दुः</span><span class="sy">ख</span><span class="sy">स</span><span class="sy">त्का</span><span class="sy">र</span><span class="sy">णा</span><span class="sy">य</span> <span class="sy">वि</span><span class="sy">त</span><span class="sy">ता</span><span class="sy">य</span> <span class="sy">न</span><span class="sy">मो</span><span class="sy">न</span><span class="sy">म</span><span class="sy">स्ते</span></p>
+        <div class="player">
+          <div class="voices" role="group" aria-label="Voice">
+            <button type="button" class="on" aria-pressed="true" data-voice="n" data-src="audio/demo1_nandini.mp3" data-t="[0.16, 0.539, 0.799, 0.919, 1.298, 1.438, 1.558, 1.757, 1.917, 2.276, 2.396, 2.596, 2.915, 3.295, 3.435, 3.554, 3.994, 4.153, 4.313, 4.593, 4.752, 4.912, 5.112, 5.431, 5.591, 5.831, 6.03, 6.49, 7.628, 8.147, 8.307, 8.546, 8.906, 9.026, 9.225, 9.425, 9.864, 10.024, 10.104, 10.383, 10.623, 10.863, 11.062, 11.222, 11.621, 11.781, 12.141, 12.26, 12.46, 12.54, 12.879, 12.979, 13.139, 13.419, 13.538, 13.858]"><b>Nandinī</b><small>female voice</small></button>
+            <button type="button" aria-pressed="false" data-voice="v" data-src="audio/demo1_vagdhenu.mp3" data-t="[0.12, 0.399, 0.619, 0.718, 1.098, 1.197, 1.317, 1.477, 1.637, 1.956, 2.076, 2.235, 2.555, 2.914, 3.034, 3.193, 3.632, 3.792, 3.992, 4.271, 4.431, 4.59, 4.79, 5.109, 5.229, 5.468, 5.708, 6.127, 7.424, 7.843, 7.983, 8.223, 8.522, 8.622, 8.782, 8.981, 9.38, 9.56, 9.66, 9.939, 10.179, 10.458, 10.618, 10.777, 11.176, 11.336, 11.675, 11.775, 12.015, 12.095, 12.474, 12.613, 12.733, 13.053, 13.212, 13.492]"><b>Vāgdhenu</b><small>male voice</small></button>
+          </div>
+          <div class="ctl">
+            <button type="button" class="play" aria-label="Play"><svg class="i-play" viewBox="0 0 16 16"><path d="M4 2.5v11l9.5-5.5z"/></svg><svg class="i-pause" viewBox="0 0 16 16"><path d="M3.5 2.5h3v11h-3zM9.5 2.5h3v11h-3z"/></svg></button>
+            <input class="seek" type="range" min="0" max="1000" value="0" step="1" aria-label="Position in the chant">
+            <span class="time">0:00 / 0:00</span>
+          </div>
+          <audio preload="metadata" src="audio/demo1_nandini.mp3"></audio>
         </div>
       </figure>
       <figure class="clip">
         <div class="clip-head"><span class="badge">śārdūlavikrīḍita</span><span class="src">Śrīmad Bhāgavatam · 1.1.2</span></div>
-        <p class="verse">जन्माद्यस्य यतोऽन्वयादितरतश्‍चार्थेष्वभिज्ञः स्वराट् तेने ब्रह्म हृदा य आदिकवये मुह्यन्ति यं सूरयः। तेजोवारिमृदां यथा विनिमयो यत्र त्रिसर्गो मृषा धाम्ना स्वेन सदा निरस्तकुहकं सत्यं परं धीमहि</p>
-        <div class="pair">
-          <div class="who n">Nandinī</div><audio controls preload="none" src="audio/demo2_nandini.mp3"></audio>
-          <div class="who v">Vāgdhenu</div><audio controls preload="none" src="audio/demo2_vagdhenu.mp3"></audio>
+        <p class="verse"><span class="sy">ज</span><span class="sy">न्मा</span><span class="sy">द्य</span><span class="sy">स्य</span> <span class="sy">य</span><span class="sy">तोऽ</span><span class="sy">न्व</span><span class="sy">या</span><span class="sy">दि</span><span class="sy">त</span><span class="sy">र</span><span class="sy">त</span><span class="sy">श्‍चा</span><span class="sy">र्थे</span><span class="sy">ष्व</span><span class="sy">भि</span><span class="sy">ज्ञः</span> <span class="sy">स्व</span><span class="sy">राट्</span> <span class="sy">ते</span><span class="sy">ने</span> <span class="sy">ब्र</span><span class="sy">ह्म</span> <span class="sy">हृ</span><span class="sy">दा</span> <span class="sy">य</span> <span class="sy">आ</span><span class="sy">दि</span><span class="sy">क</span><span class="sy">व</span><span class="sy">ये</span> <span class="sy">मु</span><span class="sy">ह्य</span><span class="sy">न्ति</span> <span class="sy">यं</span> <span class="sy">सू</span><span class="sy">र</span><span class="sy">यः</span>। <span class="sy">ते</span><span class="sy">जो</span><span class="sy">वा</span><span class="sy">रि</span><span class="sy">मृ</span><span class="sy">दां</span> <span class="sy">य</span><span class="sy">था</span> <span class="sy">वि</span><span class="sy">नि</span><span class="sy">म</span><span class="sy">यो</span> <span class="sy">य</span><span class="sy">त्र</span> <span class="sy">त्रि</span><span class="sy">स</span><span class="sy">र्गो</span> <span class="sy">मृ</span><span class="sy">षा</span> <span class="sy">धा</span><span class="sy">म्ना</span> <span class="sy">स्वे</span><span class="sy">न</span> <span class="sy">स</span><span class="sy">दा</span> <span class="sy">नि</span><span class="sy">र</span><span class="sy">स्त</span><span class="sy">कु</span><span class="sy">ह</span><span class="sy">कं</span> <span class="sy">स</span><span class="sy">त्यं</span> <span class="sy">प</span><span class="sy">रं</span> <span class="sy">धी</span><span class="sy">म</span><span class="sy">हि</span></p>
+        <div class="player">
+          <div class="voices" role="group" aria-label="Voice">
+            <button type="button" class="on" aria-pressed="true" data-voice="n" data-src="audio/demo2_nandini.mp3" data-t="[0.12, 0.24, 0.64, 0.959, 1.239, 1.399, 1.599, 1.879, 2.179, 2.339, 2.399, 2.559, 2.799, 3.238, 3.718, 3.998, 4.318, 4.678, 4.917, 5.357, 5.657, 5.957, 6.197, 6.397, 6.596, 6.796, 7.036, 7.276, 7.556, 7.636, 7.796, 8.156, 8.356, 8.675, 8.875, 9.195, 9.435, 9.635, 10.954, 11.234, 11.554, 11.834, 11.994, 12.233, 12.993, 13.153, 13.433, 13.593, 13.753, 13.873, 14.152, 14.272, 14.552, 14.832, 14.952, 15.472, 15.712, 16.151, 16.351, 16.911, 17.331, 17.431, 17.591, 17.83, 17.99, 18.19, 18.39, 18.51, 18.71, 19.11, 19.27, 19.749, 19.889, 20.269, 20.549, 20.749]"><b>Nandinī</b><small>female voice</small></button>
+            <button type="button" aria-pressed="false" data-voice="v" data-src="audio/demo2_vagdhenu.mp3" data-t="[0.12, 0.2, 0.599, 0.919, 1.198, 1.318, 1.558, 1.837, 2.177, 2.337, 2.396, 2.556, 2.796, 3.195, 3.575, 3.794, 4.114, 4.314, 4.553, 5.392, 5.732, 5.991, 6.204, 6.431, 6.63, 6.83, 7.07, 7.309, 7.569, 7.629, 7.829, 8.108, 8.308, 8.627, 8.827, 9.147, 9.386, 9.546, 10.784, 11.064, 11.423, 11.683, 11.863, 12.022, 12.502, 12.661, 12.941, 13.101, 13.261, 13.38, 13.7, 13.86, 14.139, 14.419, 14.539, 14.978, 15.178, 15.617, 15.817, 16.296, 16.676, 16.775, 16.935, 17.175, 17.295, 17.534, 17.734, 17.854, 18.014, 18.293, 18.493, 18.932, 19.072, 19.452, 19.731, 19.931]"><b>Vāgdhenu</b><small>male voice</small></button>
+          </div>
+          <div class="ctl">
+            <button type="button" class="play" aria-label="Play"><svg class="i-play" viewBox="0 0 16 16"><path d="M4 2.5v11l9.5-5.5z"/></svg><svg class="i-pause" viewBox="0 0 16 16"><path d="M3.5 2.5h3v11h-3zM9.5 2.5h3v11h-3z"/></svg></button>
+            <input class="seek" type="range" min="0" max="1000" value="0" step="1" aria-label="Position in the chant">
+            <span class="time">0:00 / 0:00</span>
+          </div>
+          <audio preload="metadata" src="audio/demo2_nandini.mp3"></audio>
         </div>
       </figure>
       <figure class="clip">
         <div class="clip-head"><span class="badge">anuṣṭubh</span><span class="src">Śrīmad Bhāgavatam · 1.1.5</span></div>
-        <p class="verse">नैमिषेऽनिमिषक्षेत्रे ऋषयः शौनकादयः। सत्रं स्वर्गाय लोकाय सहस्रसममासत</p>
-        <div class="pair">
-          <div class="who n">Nandinī</div><audio controls preload="none" src="audio/demo3_nandini.mp3"></audio>
-          <div class="who v">Vāgdhenu</div><audio controls preload="none" src="audio/demo3_vagdhenu.mp3"></audio>
+        <p class="verse"><span class="sy">नै</span><span class="sy">मि</span><span class="sy">षेऽ</span><span class="sy">नि</span><span class="sy">मि</span><span class="sy">ष</span><span class="sy">क्षे</span><span class="sy">त्रे</span> <span class="sy">ऋ</span><span class="sy">ष</span><span class="sy">यः</span> <span class="sy">शौ</span><span class="sy">न</span><span class="sy">का</span><span class="sy">द</span><span class="sy">यः</span>। <span class="sy">स</span><span class="sy">त्रं</span> <span class="sy">स्व</span><span class="sy">र्गा</span><span class="sy">य</span> <span class="sy">लो</span><span class="sy">का</span><span class="sy">य</span> <span class="sy">स</span><span class="sy">ह</span><span class="sy">स्र</span><span class="sy">स</span><span class="sy">म</span><span class="sy">मा</span><span class="sy">स</span><span class="sy">त</span></p>
+        <div class="player">
+          <div class="voices" role="group" aria-label="Voice">
+            <button type="button" class="on" aria-pressed="true" data-voice="n" data-src="audio/demo3_nandini.mp3" data-t="[0.08, 0.359, 0.518, 0.797, 0.956, 1.116, 1.435, 1.753, 2.271, 2.391, 2.55, 2.869, 3.148, 3.347, 3.726, 3.825, 5.26, 5.459, 5.937, 6.137, 6.675, 6.814, 7.093, 7.511, 7.651, 7.81, 8.009, 8.288, 8.448, 8.647, 8.926, 9.125]"><b>Nandinī</b><small>female voice</small></button>
+            <button type="button" aria-pressed="false" data-voice="v" data-src="audio/demo3_vagdhenu.mp3" data-t="[0.08, 0.319, 0.478, 0.837, 0.917, 1.077, 1.396, 1.595, 2.153, 2.273, 2.432, 2.711, 3.03, 3.19, 3.549, 3.628, 5.064, 5.223, 5.662, 5.861, 6.38, 6.499, 6.778, 7.157, 7.297, 7.456, 7.656, 7.935, 8.094, 8.294, 8.573, 8.772]"><b>Vāgdhenu</b><small>male voice</small></button>
+          </div>
+          <div class="ctl">
+            <button type="button" class="play" aria-label="Play"><svg class="i-play" viewBox="0 0 16 16"><path d="M4 2.5v11l9.5-5.5z"/></svg><svg class="i-pause" viewBox="0 0 16 16"><path d="M3.5 2.5h3v11h-3zM9.5 2.5h3v11h-3z"/></svg></button>
+            <input class="seek" type="range" min="0" max="1000" value="0" step="1" aria-label="Position in the chant">
+            <span class="time">0:00 / 0:00</span>
+          </div>
+          <audio preload="metadata" src="audio/demo3_nandini.mp3"></audio>
         </div>
       </figure>
       <figure class="clip">
         <div class="clip-head"><span class="badge">vaṃśastha</span><span class="src">Śrīmad Bhāgavatam · 1.3.5</span></div>
-        <p class="verse">पश्यन्त्यदो रूपमदभ्रचक्षुषः सहस्रपादोरुभुजाननाद्भुतम्। सहस्रमूर्धश्रवणाक्षिनासिकं सहस्रमौल्यम्बरकुण्डलोल्‍लसत्</p>
-        <div class="pair">
-          <div class="who n">Nandinī</div><audio controls preload="none" src="audio/demo4_nandini.mp3"></audio>
-          <div class="who v">Vāgdhenu</div><audio controls preload="none" src="audio/demo4_vagdhenu.mp3"></audio>
+        <p class="verse"><span class="sy">प</span><span class="sy">श्य</span><span class="sy">न्त्य</span><span class="sy">दो</span> <span class="sy">रू</span><span class="sy">प</span><span class="sy">म</span><span class="sy">द</span><span class="sy">भ्र</span><span class="sy">च</span><span class="sy">क्षु</span><span class="sy">षः</span> <span class="sy">स</span><span class="sy">ह</span><span class="sy">स्र</span><span class="sy">पा</span><span class="sy">दो</span><span class="sy">रु</span><span class="sy">भु</span><span class="sy">जा</span><span class="sy">न</span><span class="sy">ना</span><span class="sy">द्भु</span><span class="sy">तम्</span>। <span class="sy">स</span><span class="sy">ह</span><span class="sy">स्र</span><span class="sy">मू</span><span class="sy">र्ध</span><span class="sy">श्र</span><span class="sy">व</span><span class="sy">णा</span><span class="sy">क्षि</span><span class="sy">ना</span><span class="sy">सि</span><span class="sy">कं</span> <span class="sy">स</span><span class="sy">ह</span><span class="sy">स्र</span><span class="sy">मौ</span><span class="sy">ल्य</span><span class="sy">म्ब</span><span class="sy">र</span><span class="sy">कु</span><span class="sy">ण्ड</span><span class="sy">लो</span><span class="sy">ल्‍ल</span><span class="sy">सत्</span></p>
+        <div class="player">
+          <div class="voices" role="group" aria-label="Voice">
+            <button type="button" class="on" aria-pressed="true" data-voice="n" data-src="audio/demo4_nandini.mp3" data-t="[0.12, 0.24, 0.519, 0.759, 1.038, 1.277, 1.437, 1.557, 1.717, 1.996, 2.236, 2.435, 2.715, 2.834, 3.034, 3.313, 3.673, 3.912, 4.112, 4.272, 4.611, 4.711, 4.93, 5.27, 6.587, 6.747, 6.946, 7.226, 7.425, 7.825, 8.024, 8.184, 8.463, 8.703, 8.942, 9.202, 9.741, 9.9, 10.06, 10.34, 10.579, 10.779, 11.058, 11.258, 11.378, 11.617, 11.817, 12.056]"><b>Nandinī</b><small>female voice</small></button>
+            <button type="button" aria-pressed="false" data-voice="v" data-src="audio/demo4_vagdhenu.mp3" data-t="[0.12, 0.24, 0.48, 0.719, 0.999, 1.219, 1.359, 1.519, 1.679, 1.958, 2.158, 2.358, 2.598, 2.758, 2.918, 3.197, 3.497, 3.717, 3.917, 4.077, 4.416, 4.516, 4.736, 5.076, 6.474, 6.634, 6.794, 7.074, 7.234, 7.594, 7.793, 7.953, 8.193, 8.433, 8.633, 8.892, 9.072, 9.232, 9.392, 9.632, 9.832, 10.031, 10.311, 10.471, 10.631, 10.871, 11.071, 11.35]"><b>Vāgdhenu</b><small>male voice</small></button>
+          </div>
+          <div class="ctl">
+            <button type="button" class="play" aria-label="Play"><svg class="i-play" viewBox="0 0 16 16"><path d="M4 2.5v11l9.5-5.5z"/></svg><svg class="i-pause" viewBox="0 0 16 16"><path d="M3.5 2.5h3v11h-3zM9.5 2.5h3v11h-3z"/></svg></button>
+            <input class="seek" type="range" min="0" max="1000" value="0" step="1" aria-label="Position in the chant">
+            <span class="time">0:00 / 0:00</span>
+          </div>
+          <audio preload="metadata" src="audio/demo4_nandini.mp3"></audio>
         </div>
       </figure>
       <figure class="clip">
         <div class="clip-head"><span class="badge">drutavilambita</span><span class="src">Śrīmad Bhāgavatam · 1.1.4</span></div>
-        <p class="verse">निगमकल्पतरोर्गलितं फलं शुकमुखादमृतद्रवसंयुतम्। पिबत भागवतं रसमालयं मुहुरहो रसिका भुवि भावुकाः</p>
-        <div class="pair">
-          <div class="who n">Nandinī</div><audio controls preload="none" src="audio/demo5_nandini.mp3"></audio>
-          <div class="who v">Vāgdhenu</div><audio controls preload="none" src="audio/demo5_vagdhenu.mp3"></audio>
+        <p class="verse"><span class="sy">नि</span><span class="sy">ग</span><span class="sy">म</span><span class="sy">क</span><span class="sy">ल्प</span><span class="sy">त</span><span class="sy">रो</span><span class="sy">र्ग</span><span class="sy">लि</span><span class="sy">तं</span> <span class="sy">फ</span><span class="sy">लं</span> <span class="sy">शु</span><span class="sy">क</span><span class="sy">मु</span><span class="sy">खा</span><span class="sy">द</span><span class="sy">मृ</span><span class="sy">त</span><span class="sy">द्र</span><span class="sy">व</span><span class="sy">सं</span><span class="sy">यु</span><span class="sy">तम्</span>। <span class="sy">पि</span><span class="sy">ब</span><span class="sy">त</span> <span class="sy">भा</span><span class="sy">ग</span><span class="sy">व</span><span class="sy">तं</span> <span class="sy">र</span><span class="sy">स</span><span class="sy">मा</span><span class="sy">ल</span><span class="sy">यं</span> <span class="sy">मु</span><span class="sy">हु</span><span class="sy">र</span><span class="sy">हो</span> <span class="sy">र</span><span class="sy">सि</span><span class="sy">का</span> <span class="sy">भु</span><span class="sy">वि</span> <span class="sy">भा</span><span class="sy">वु</span><span class="sy">काः</span></p>
+        <div class="player">
+          <div class="voices" role="group" aria-label="Voice">
+            <button type="button" class="on" aria-pressed="true" data-voice="n" data-src="audio/demo5_nandini.mp3" data-t="[0.08, 0.24, 0.36, 0.56, 0.68, 1.039, 1.199, 1.479, 1.799, 2.039, 2.318, 2.518, 2.918, 3.118, 3.278, 3.478, 3.877, 3.997, 4.237, 4.437, 4.677, 4.877, 5.196, 5.396, 6.915, 7.115, 7.275, 7.475, 7.715, 7.914, 8.114, 9.154, 9.313, 9.513, 9.793, 9.993, 10.553, 10.752, 11.012, 11.112, 11.472, 11.672, 11.932, 12.271, 12.471, 12.711, 13.091, 13.271]"><b>Nandinī</b><small>female voice</small></button>
+            <button type="button" aria-pressed="false" data-voice="v" data-src="audio/demo5_vagdhenu.mp3" data-t="[0.08, 0.239, 0.359, 0.559, 0.679, 1.038, 1.157, 1.397, 1.716, 1.956, 2.275, 2.475, 2.834, 3.033, 3.233, 3.432, 3.931, 4.071, 4.311, 4.51, 4.79, 4.989, 5.308, 5.508, 7.224, 7.384, 7.583, 7.823, 8.102, 8.302, 8.461, 8.861, 9.02, 9.22, 9.459, 9.659, 10.138, 10.297, 10.557, 10.657, 10.936, 11.136, 11.395, 11.774, 11.974, 12.213, 12.552, 12.772]"><b>Vāgdhenu</b><small>male voice</small></button>
+          </div>
+          <div class="ctl">
+            <button type="button" class="play" aria-label="Play"><svg class="i-play" viewBox="0 0 16 16"><path d="M4 2.5v11l9.5-5.5z"/></svg><svg class="i-pause" viewBox="0 0 16 16"><path d="M3.5 2.5h3v11h-3zM9.5 2.5h3v11h-3z"/></svg></button>
+            <input class="seek" type="range" min="0" max="1000" value="0" step="1" aria-label="Position in the chant">
+            <span class="time">0:00 / 0:00</span>
+          </div>
+          <audio preload="metadata" src="audio/demo5_nandini.mp3"></audio>
         </div>
       </figure>
       <figure class="clip">
         <div class="clip-head"><span class="badge">mālinī</span><span class="src">Narasiṃha stuti · retroflex tongue-twister</span></div>
-        <p class="verse">हठलुठ दल घिष्टोत्कण्ठदष्टोष्ठ विद्युत् सटशठ कठिनोरः पीठभित्सुष्ठुनिष्ठाम् ।<br>पठतिनुतव कण्ठाधिष्ठ घोरान्त्रमाला दह दह नरसिंहासह्यवीर्याहितं मे ॥</p>
-        <div class="pair">
-          <div class="who n">Nandinī</div><audio controls preload="none" src="audio/demo6_nandini.mp3"></audio>
-          <div class="who v">Vāgdhenu</div><audio controls preload="none" src="audio/demo6_vagdhenu.mp3"></audio>
+        <p class="verse"><span class="sy">ह</span><span class="sy">ठ</span><span class="sy">लु</span><span class="sy">ठ</span> <span class="sy">द</span><span class="sy">ल</span> <span class="sy">घि</span><span class="sy">ष्टो</span><span class="sy">त्क</span><span class="sy">ण्ठ</span><span class="sy">द</span><span class="sy">ष्टो</span><span class="sy">ष्ठ</span> <span class="sy">वि</span><span class="sy">द्युत्</span> <span class="sy">स</span><span class="sy">ट</span><span class="sy">श</span><span class="sy">ठ</span> <span class="sy">क</span><span class="sy">ठि</span><span class="sy">नो</span><span class="sy">रः</span> <span class="sy">पी</span><span class="sy">ठ</span><span class="sy">भि</span><span class="sy">त्सु</span><span class="sy">ष्ठु</span><span class="sy">नि</span><span class="sy">ष्ठाम्</span> ।<br><span class="sy">प</span><span class="sy">ठ</span><span class="sy">ति</span><span class="sy">नु</span><span class="sy">त</span><span class="sy">व</span> <span class="sy">क</span><span class="sy">ण्ठा</span><span class="sy">धि</span><span class="sy">ष्ठ</span> <span class="sy">घो</span><span class="sy">रा</span><span class="sy">न्त्र</span><span class="sy">मा</span><span class="sy">ला</span> <span class="sy">द</span><span class="sy">ह</span> <span class="sy">द</span><span class="sy">ह</span> <span class="sy">न</span><span class="sy">र</span><span class="sy">सिं</span><span class="sy">हा</span><span class="sy">स</span><span class="sy">ह्य</span><span class="sy">वी</span><span class="sy">र्या</span><span class="sy">हि</span><span class="sy">तं</span> <span class="sy">मे</span> ॥</p>
+        <div class="player">
+          <div class="voices" role="group" aria-label="Voice">
+            <button type="button" class="on" aria-pressed="true" data-voice="n" data-src="audio/demo6_nandini.mp3" data-t="[0.04, 0.2, 0.36, 0.52, 0.68, 0.8, 1.0, 1.279, 1.599, 1.879, 2.159, 2.439, 2.799, 2.999, 3.159, 3.558, 3.678, 3.878, 3.998, 4.198, 4.358, 4.518, 4.798, 5.158, 5.397, 5.637, 5.797, 6.197, 6.397, 6.677, 8.156, 8.316, 8.476, 8.636, 8.796, 8.916, 9.116, 9.236, 9.775, 10.035, 10.275, 10.555, 10.935, 11.195, 11.435, 11.794, 11.954, 12.114, 12.234, 12.394, 12.514, 12.674, 12.954, 13.334, 13.434, 13.754, 13.953, 14.393, 14.613, 14.873]"><b>Nandinī</b><small>female voice</small></button>
+            <button type="button" aria-pressed="false" data-voice="v" data-src="audio/demo6_vagdhenu.mp3" data-t="[0.04, 0.16, 0.32, 0.48, 0.6, 0.72, 0.919, 1.159, 1.439, 1.759, 2.079, 2.358, 2.718, 2.958, 3.118, 3.518, 3.638, 3.798, 3.957, 4.157, 4.277, 4.437, 4.717, 5.037, 5.317, 5.516, 5.676, 6.116, 6.276, 6.596, 8.355, 8.514, 8.674, 8.794, 8.954, 9.074, 9.314, 9.434, 9.954, 10.193, 10.433, 10.673, 10.973, 11.233, 11.433, 11.712, 11.872, 12.032, 12.152, 12.272, 12.392, 12.552, 12.832, 13.231, 13.351, 13.631, 13.871, 14.351, 14.571, 14.83]"><b>Vāgdhenu</b><small>male voice</small></button>
+          </div>
+          <div class="ctl">
+            <button type="button" class="play" aria-label="Play"><svg class="i-play" viewBox="0 0 16 16"><path d="M4 2.5v11l9.5-5.5z"/></svg><svg class="i-pause" viewBox="0 0 16 16"><path d="M3.5 2.5h3v11h-3zM9.5 2.5h3v11h-3z"/></svg></button>
+            <input class="seek" type="range" min="0" max="1000" value="0" step="1" aria-label="Position in the chant">
+            <span class="time">0:00 / 0:00</span>
+          </div>
+          <audio preload="metadata" src="audio/demo6_nandini.mp3"></audio>
         </div>
       </figure>
-    </div>
-    <p class="note">Both voices are rendered the same way, through Vāgdhenu's renderer with his website's settings and
-      seed 60. The meter is detected, except for the last three verses, where the detector misses it and the meter is
-      chosen as in the demo's Advanced options. Vāgdhenu here is the model his website serves.</p>
-  </section>
-
-  <section id="unseen">
-    <h2>Verses neither model was trained on</h2>
-    <p class="lead">Four of the sixty verses used to compare the two models, from the Bhāgavata Purāṇa and the Mukundamālā.</p>
-    <div class="clips">
       <figure class="clip">
         <div class="clip-head"><span class="badge">anuṣṭubh</span><span class="src">Bhāgavata Purāṇa · 3.6.6</span></div>
-        <p class="verse">हिरण्मयः स पुरुषः सहस्रपरिवत्सरान् आण्डकोश उवासाप्सु सर्वसत्त्वोपबृंहितः</p>
-        <div class="pair">
-          <div class="who n">Nandinī</div><audio controls preload="none" src="audio/unseen39_nandini.mp3"></audio>
-          <div class="who v">Vāgdhenu</div><audio controls preload="none" src="audio/unseen39_vagdhenu.mp3"></audio>
+        <p class="verse"><span class="sy">हि</span><span class="sy">र</span><span class="sy">ण्म</span><span class="sy">यः</span> <span class="sy">स</span> <span class="sy">पु</span><span class="sy">रु</span><span class="sy">षः</span> <span class="sy">स</span><span class="sy">ह</span><span class="sy">स्र</span><span class="sy">प</span><span class="sy">रि</span><span class="sy">व</span><span class="sy">त्स</span><span class="sy">रान्</span> <span class="sy">आ</span><span class="sy">ण्ड</span><span class="sy">को</span><span class="sy">श</span> <span class="sy">उ</span><span class="sy">वा</span><span class="sy">सा</span><span class="sy">प्सु</span> <span class="sy">स</span><span class="sy">र्व</span><span class="sy">स</span><span class="sy">त्त्वो</span><span class="sy">प</span><span class="sy">बृं</span><span class="sy">हि</span><span class="sy">तः</span></p>
+        <div class="player">
+          <div class="voices" role="group" aria-label="Voice">
+            <button type="button" class="on" aria-pressed="true" data-voice="n" data-src="audio/unseen39_nandini.mp3" data-t="[0.04, 0.319, 0.399, 0.638, 0.917, 1.156, 1.296, 1.435, 1.834, 2.033, 2.232, 2.511, 2.631, 2.791, 2.95, 3.229, 4.266, 4.465, 4.824, 5.063, 5.302, 5.422, 5.701, 6.02, 6.339, 6.428, 6.737, 6.897, 7.395, 7.574, 7.933, 8.172]"><b>Nandinī</b><small>female voice</small></button>
+            <button type="button" aria-pressed="false" data-voice="v" data-src="audio/unseen39_vagdhenu.mp3" data-t="[0.08, 0.359, 0.439, 0.638, 0.957, 1.196, 1.356, 1.475, 1.794, 1.993, 2.153, 2.472, 2.591, 2.751, 2.871, 3.189, 4.465, 4.625, 5.023, 5.263, 5.502, 5.621, 5.901, 6.219, 6.538, 6.628, 6.977, 7.136, 7.615, 7.774, 8.133, 8.372]"><b>Vāgdhenu</b><small>male voice</small></button>
+          </div>
+          <div class="ctl">
+            <button type="button" class="play" aria-label="Play"><svg class="i-play" viewBox="0 0 16 16"><path d="M4 2.5v11l9.5-5.5z"/></svg><svg class="i-pause" viewBox="0 0 16 16"><path d="M3.5 2.5h3v11h-3zM9.5 2.5h3v11h-3z"/></svg></button>
+            <input class="seek" type="range" min="0" max="1000" value="0" step="1" aria-label="Position in the chant">
+            <span class="time">0:00 / 0:00</span>
+          </div>
+          <audio preload="metadata" src="audio/unseen39_nandini.mp3"></audio>
         </div>
       </figure>
       <figure class="clip">
         <div class="clip-head"><span class="badge">anuṣṭubh</span><span class="src">Bhāgavata Purāṇa · 4.14.38</span></div>
-        <p class="verse">एवं मृशन्त ऋषयो धावतां सर्वतोदिशम् पांसुः समुत्थितो भूरिश्चोराणामभिलुम्पताम्</p>
-        <div class="pair">
-          <div class="who n">Nandinī</div><audio controls preload="none" src="audio/unseen47_nandini.mp3"></audio>
-          <div class="who v">Vāgdhenu</div><audio controls preload="none" src="audio/unseen47_vagdhenu.mp3"></audio>
+        <p class="verse"><span class="sy">ए</span><span class="sy">वं</span> <span class="sy">मृ</span><span class="sy">श</span><span class="sy">न्त</span> <span class="sy">ऋ</span><span class="sy">ष</span><span class="sy">यो</span> <span class="sy">धा</span><span class="sy">व</span><span class="sy">तां</span> <span class="sy">स</span><span class="sy">र्व</span><span class="sy">तो</span><span class="sy">दि</span><span class="sy">शम्</span> <span class="sy">पां</span><span class="sy">सुः</span> <span class="sy">स</span><span class="sy">मु</span><span class="sy">त्थि</span><span class="sy">तो</span> <span class="sy">भू</span><span class="sy">रि</span><span class="sy">श्चो</span><span class="sy">रा</span><span class="sy">णा</span><span class="sy">म</span><span class="sy">भि</span><span class="sy">लु</span><span class="sy">म्प</span><span class="sy">ताम्</span></p>
+        <div class="player">
+          <div class="voices" role="group" aria-label="Voice">
+            <button type="button" class="on" aria-pressed="true" data-voice="n" data-src="audio/unseen47_nandini.mp3" data-t="[0.199, 0.319, 0.598, 0.797, 1.036, 1.275, 1.395, 1.554, 1.913, 2.271, 2.391, 3.746, 3.836, 4.224, 4.503, 4.662, 5.021, 5.42, 5.699, 5.858, 6.017, 6.396, 6.735, 7.014, 7.372, 7.651, 7.93, 8.349, 8.488, 8.647, 8.807, 9.165]"><b>Nandinī</b><small>female voice</small></button>
+            <button type="button" aria-pressed="false" data-voice="v" data-src="audio/unseen47_vagdhenu.mp3" data-t="[0.16, 0.28, 0.559, 0.719, 0.999, 1.199, 1.319, 1.478, 1.798, 2.158, 2.278, 3.516, 3.606, 3.956, 4.236, 4.355, 4.675, 4.995, 5.314, 5.474, 5.634, 5.974, 6.273, 6.513, 6.873, 7.152, 7.432, 7.812, 7.952, 8.111, 8.231, 8.551]"><b>Vāgdhenu</b><small>male voice</small></button>
+          </div>
+          <div class="ctl">
+            <button type="button" class="play" aria-label="Play"><svg class="i-play" viewBox="0 0 16 16"><path d="M4 2.5v11l9.5-5.5z"/></svg><svg class="i-pause" viewBox="0 0 16 16"><path d="M3.5 2.5h3v11h-3zM9.5 2.5h3v11h-3z"/></svg></button>
+            <input class="seek" type="range" min="0" max="1000" value="0" step="1" aria-label="Position in the chant">
+            <span class="time">0:00 / 0:00</span>
+          </div>
+          <audio preload="metadata" src="audio/unseen47_nandini.mp3"></audio>
         </div>
       </figure>
       <figure class="clip">
         <div class="clip-head"><span class="badge">vaṃśastha</span><span class="src">Bhāgavata Purāṇa · 2.4.21</span></div>
-        <p class="verse">यदङ्घ्र्यभिध्यानसमाधिधौतया धियानुपश्यन्ति हि तत्त्वमात्मनः वदन्ति चैतत्कवयो यथारुचं स मे मुकुन्दो भगवान्प्रसीदताम्</p>
-        <div class="pair">
-          <div class="who n">Nandinī</div><audio controls preload="none" src="audio/unseen21_nandini.mp3"></audio>
-          <div class="who v">Vāgdhenu</div><audio controls preload="none" src="audio/unseen21_vagdhenu.mp3"></audio>
+        <p class="verse"><span class="sy">य</span><span class="sy">द</span><span class="sy">ङ्घ्र्य</span><span class="sy">भि</span><span class="sy">ध्या</span><span class="sy">न</span><span class="sy">स</span><span class="sy">मा</span><span class="sy">धि</span><span class="sy">धौ</span><span class="sy">त</span><span class="sy">या</span> <span class="sy">धि</span><span class="sy">या</span><span class="sy">नु</span><span class="sy">प</span><span class="sy">श्य</span><span class="sy">न्ति</span> <span class="sy">हि</span> <span class="sy">त</span><span class="sy">त्त्व</span><span class="sy">मा</span><span class="sy">त्म</span><span class="sy">नः</span> <span class="sy">व</span><span class="sy">द</span><span class="sy">न्ति</span> <span class="sy">चै</span><span class="sy">त</span><span class="sy">त्क</span><span class="sy">व</span><span class="sy">यो</span> <span class="sy">य</span><span class="sy">था</span><span class="sy">रु</span><span class="sy">चं</span> <span class="sy">स</span> <span class="sy">मे</span> <span class="sy">मु</span><span class="sy">कु</span><span class="sy">न्दो</span> <span class="sy">भ</span><span class="sy">ग</span><span class="sy">वा</span><span class="sy">न्प्र</span><span class="sy">सी</span><span class="sy">द</span><span class="sy">ताम्</span></p>
+        <div class="player">
+          <div class="voices" role="group" aria-label="Voice">
+            <button type="button" class="on" aria-pressed="true" data-voice="n" data-src="audio/unseen21_nandini.mp3" data-t="[0.08, 0.16, 0.32, 0.68, 0.92, 1.28, 1.399, 1.559, 1.799, 1.999, 2.279, 2.439, 2.719, 2.919, 3.159, 3.319, 3.479, 3.799, 3.998, 4.798, 4.998, 5.278, 5.438, 5.718, 6.038, 6.158, 6.358, 6.517, 6.797, 6.917, 7.197, 7.357, 7.677, 7.837, 8.117, 8.277, 8.557, 8.717, 9.076, 9.236, 9.516, 9.876, 9.996, 10.116, 10.343, 10.676, 10.916, 11.116]"><b>Nandinī</b><small>female voice</small></button>
+            <button type="button" aria-pressed="false" data-voice="v" data-src="audio/unseen21_vagdhenu.mp3" data-t="[0.04, 0.16, 0.28, 0.639, 0.839, 1.179, 1.279, 1.439, 1.679, 1.878, 2.118, 2.318, 2.558, 2.758, 3.017, 3.157, 3.317, 3.677, 3.877, 4.596, 4.756, 5.036, 5.196, 5.515, 5.835, 5.955, 6.155, 6.315, 6.554, 6.674, 6.954, 7.154, 7.394, 7.553, 7.853, 7.993, 8.313, 8.473, 8.752, 8.912, 9.152, 9.472, 9.592, 9.752, 9.938, 10.271, 10.511, 10.711]"><b>Vāgdhenu</b><small>male voice</small></button>
+          </div>
+          <div class="ctl">
+            <button type="button" class="play" aria-label="Play"><svg class="i-play" viewBox="0 0 16 16"><path d="M4 2.5v11l9.5-5.5z"/></svg><svg class="i-pause" viewBox="0 0 16 16"><path d="M3.5 2.5h3v11h-3zM9.5 2.5h3v11h-3z"/></svg></button>
+            <input class="seek" type="range" min="0" max="1000" value="0" step="1" aria-label="Position in the chant">
+            <span class="time">0:00 / 0:00</span>
+          </div>
+          <audio preload="metadata" src="audio/unseen21_nandini.mp3"></audio>
         </div>
       </figure>
       <figure class="clip">
         <div class="clip-head"><span class="badge">mandākrāntā</span><span class="src">Mukundamālā · 1.5</span></div>
-        <p class="verse">नाहं वन्दे तव चरणयोर्द्वन्द्वमद्वन्द्वहेतोः कुम्भीपाकं गुरुमपि हरे नारकं नापनेतुम् रम्या रामा मृदुतनुलता नन्दने नापि रन्तुं भावे भावे हृदयभवने भावयेऽहं भवन्तम्</p>
-        <div class="pair">
-          <div class="who n">Nandinī</div><audio controls preload="none" src="audio/unseen57_nandini.mp3"></audio>
-          <div class="who v">Vāgdhenu</div><audio controls preload="none" src="audio/unseen57_vagdhenu.mp3"></audio>
+        <p class="verse"><span class="sy">ना</span><span class="sy">हं</span> <span class="sy">व</span><span class="sy">न्दे</span> <span class="sy">त</span><span class="sy">व</span> <span class="sy">च</span><span class="sy">र</span><span class="sy">ण</span><span class="sy">यो</span><span class="sy">र्द्व</span><span class="sy">न्द्व</span><span class="sy">म</span><span class="sy">द्व</span><span class="sy">न्द्व</span><span class="sy">हे</span><span class="sy">तोः</span> <span class="sy">कु</span><span class="sy">म्भी</span><span class="sy">पा</span><span class="sy">कं</span> <span class="sy">गु</span><span class="sy">रु</span><span class="sy">म</span><span class="sy">पि</span> <span class="sy">ह</span><span class="sy">रे</span> <span class="sy">ना</span><span class="sy">र</span><span class="sy">कं</span> <span class="sy">ना</span><span class="sy">प</span><span class="sy">ने</span><span class="sy">तुम्</span> <span class="sy">र</span><span class="sy">म्या</span> <span class="sy">रा</span><span class="sy">मा</span> <span class="sy">मृ</span><span class="sy">दु</span><span class="sy">त</span><span class="sy">नु</span><span class="sy">ल</span><span class="sy">ता</span> <span class="sy">न</span><span class="sy">न्द</span><span class="sy">ने</span> <span class="sy">ना</span><span class="sy">पि</span> <span class="sy">र</span><span class="sy">न्तुं</span> <span class="sy">भा</span><span class="sy">वे</span> <span class="sy">भा</span><span class="sy">वे</span> <span class="sy">हृ</span><span class="sy">द</span><span class="sy">य</span><span class="sy">भ</span><span class="sy">व</span><span class="sy">ने</span> <span class="sy">भा</span><span class="sy">व</span><span class="sy">येऽ</span><span class="sy">हं</span> <span class="sy">भ</span><span class="sy">व</span><span class="sy">न्तम्</span></p>
+        <div class="player">
+          <div class="voices" role="group" aria-label="Voice">
+            <button type="button" class="on" aria-pressed="true" data-voice="n" data-src="audio/unseen57_nandini.mp3" data-t="[0.08, 0.38, 0.599, 0.799, 1.079, 1.199, 1.358, 1.598, 1.698, 1.798, 1.958, 2.397, 2.637, 2.797, 3.117, 3.436, 3.676, 4.155, 4.275, 4.715, 5.074, 5.953, 6.093, 6.193, 6.353, 6.473, 6.593, 6.832, 7.112, 7.192, 7.472, 7.751, 7.831, 8.111, 8.87, 9.03, 9.43, 9.669, 9.989, 10.189, 10.309, 10.428, 10.588, 10.748, 11.267, 11.507, 11.627, 11.947, 12.226, 12.386, 12.586, 12.986, 13.265, 13.665, 13.905, 14.104, 14.264, 14.384, 14.544, 14.624, 14.784, 15.103, 15.423, 15.543, 15.782, 16.302, 16.482, 16.701]"><b>Nandinī</b><small>female voice</small></button>
+            <button type="button" aria-pressed="false" data-voice="v" data-src="audio/unseen57_vagdhenu.mp3" data-t="[0.08, 0.34, 0.6, 0.8, 1.039, 1.199, 1.359, 1.559, 1.659, 1.759, 1.919, 2.319, 2.558, 2.718, 3.038, 3.318, 3.558, 4.078, 4.237, 4.677, 4.957, 5.317, 5.457, 5.557, 5.717, 5.876, 5.956, 6.236, 6.516, 6.596, 6.876, 7.156, 7.236, 7.476, 8.515, 8.675, 9.075, 9.314, 9.634, 9.794, 9.954, 10.074, 10.234, 10.354, 10.634, 10.874, 11.033, 11.273, 11.553, 11.713, 11.953, 12.313, 12.592, 12.952, 13.232, 13.512, 13.672, 13.792, 13.952, 14.072, 14.232, 14.631, 14.951, 15.071, 15.311, 15.631, 15.811, 16.03]"><b>Vāgdhenu</b><small>male voice</small></button>
+          </div>
+          <div class="ctl">
+            <button type="button" class="play" aria-label="Play"><svg class="i-play" viewBox="0 0 16 16"><path d="M4 2.5v11l9.5-5.5z"/></svg><svg class="i-pause" viewBox="0 0 16 16"><path d="M3.5 2.5h3v11h-3zM9.5 2.5h3v11h-3z"/></svg></button>
+            <input class="seek" type="range" min="0" max="1000" value="0" step="1" aria-label="Position in the chant">
+            <span class="time">0:00 / 0:00</span>
+          </div>
+          <audio preload="metadata" src="audio/unseen57_nandini.mp3"></audio>
         </div>
       </figure>
     </div>
-    <p class="note">Verse texts from the <a href="https://github.com/OliverHellwig/sanskrit">Digital Corpus of Sanskrit</a>
-      (Oliver Hellwig, CC BY 4.0). Vāgdhenu here is his released fine-tune, trained the same way as Nandinī.
-      The texts have no daṇḍas, so each model chooses where to pause.</p>
   </section>
 
-  <section id="how">
-    <h2>How it was made</h2>
-    <p class="lead">No new recordings: every clip of Vāgdhenu's corpus was remade in a female voice, keeping its chant.</p>
-    <ol class="steps">
-      <li><strong>Convert the voice.</strong> A voice converter turns each of Vāgdhenu's 1,467 recordings into the voice
-        of a 25-second female sample.</li>
-      <li><strong>Put the melody back.</strong> The converter drifts from the chant's pitch, so each clip is resynthesised
-        on the reciter's own pitch, raised about 6.7 semitones, with his timing.</li>
-      <li><strong>Keep the clips that read right.</strong> Each verse gets up to 10 candidates. A Sanskrit chant recogniser
-        keeps the first with at most one syllable wrong.</li>
-      <li><strong>Train the voice.</strong> IndicF5 is fine-tuned on the converted clips with Vāgdhenu's own recipe, and
-        the reference bank and vocoder are remade for the new voice. It runs in Vāgdhenu's renderer unchanged.</li>
-    </ol>
-    <figure class="diagram">
-      <img src="dataset_pipeline.png" alt="How each clip is made: up to 10 candidates per verse, each a voice conversion, a melody step and a recogniser check" loading="lazy">
-      <figcaption>How each clip of the dataset is made.</figcaption>
-    </figure>
-    <div class="stats">
-      <div class="stat"><div class="big">1,298 / 1,467</div><div class="what">clips with at most one syllable wrong, by the recogniser</div></div>
-      <div class="stat"><div class="big">3.81% vs 3.67%</div><div class="what">character error rate of Nandinī and Vāgdhenu on 60 unseen verses</div></div>
-      <div class="stat"><div class="big">5 of 8</div><div class="what">blind pairs where the tune matched Vāgdhenu's fully or mostly</div></div>
+  <section id="about">
+    <h2>What it does</h2>
+    <p class="lead">Give it a verse; it gives back a chant.</p>
+    <div class="features">
+      <div class="feature"><h3>Any Indian script</h3>
+        <p>Paste the verse in Devanagari or in any other Indian script, such as Kannada or Telugu.</p></div>
+      <div class="feature"><h3>Chants in the verse's meter</h3>
+        <p>It recognises the meter (anuṣṭubh, vasantatilakā, śārdūlavikrīḍita and a dozen more) and chants each in
+          its traditional tune.</p></div>
+      <div class="feature"><h3>Clear Sanskrit sounds</h3>
+        <p>Aspirated and retroflex consonants, the three sibilants and visarga are kept distinct, as in Vāgdhenu.</p></div>
+      <div class="feature"><h3>Free and open</h3>
+        <p>The voice, its code and its data are free to use. It runs on a GPU, on a Mac, or on an ordinary computer.</p></div>
     </div>
-    <p><strong>Limitations.</strong> Every error rate comes from the same recogniser that chose the training clips, so
-      the rates are optimistic. The tune was judged by one listener, not in a controlled listening study. Nandinī
-      sometimes pauses in different places from Vāgdhenu.</p>
   </section>
 
-  <section id="run">
-    <h2>Run it yourself</h2>
-    <p class="lead">One command chants a verse, on a GPU, on Apple silicon, or on a CPU without PyTorch.</p>
-    <pre><button class="copy" type="button">Copy</button><code>git clone https://github.com/ram-g-athreya/nandini && cd nandini
-scripts/setup_pytorch.sh          # or setup_onnx.sh (no PyTorch), setup_mlx.sh (Apple silicon)
-uv run nandini chant --text "वसुदेवसुतं देवं कंसचाणूरमर्दनम् । देवकीपरमानन्दं कृष्णं वन्दे जगद्गुरुम् ॥" --out out.wav
-uv run nandini chant --backend onnx --text "..."   # --compact for the smaller files
-uv run nandini chant --backend mlx --text "..."</code></pre>
-    <ul class="plain">
-      <li>The model downloads on first use, from <a href="https://huggingface.co/ramgathreya/nandini">ramgathreya/nandini</a>.</li>
-      <li>For a 10-second verse on a MacBook Air M2: about 1 minute with MLX, 3 minutes with PyTorch, 6 to 10 minutes with ONNX on the CPU.</li>
-      <li>The repository also rebuilds the dataset and retrains the model: see its <a href="https://github.com/ram-g-athreya/nandini#readme">README</a>.</li>
-    </ul>
-  </section>
-
-  <section id="credits">
-    <h2>Credits and licences</h2>
-    <ul class="plain">
-      <li><strong>Vāgdhenu</strong> by Prof. Prathosh A P, Indian Institute of Science, Bengaluru: the recordings, the
-        renderer, the training recipe and the comparison voice.
-        <a href="https://prathosh.in/vagdhenu/">Website</a> · <a href="https://github.com/prathoshap/vagdhenu">code</a> ·
-        <a href="https://huggingface.co/prathoshap/vagdhenu">model</a> (Apache-2.0) ·
-        <a href="https://huggingface.co/datasets/prathoshap/vagdhenu-data">corpus</a> (CC-BY-4.0).</li>
-      <li><strong>Nandinī</strong>: code and model Apache-2.0, dataset CC-BY-4.0. Built on AI4Bharat IndicF5 and NVIDIA
-        BigVGAN-v2 (MIT), and the Su-śrotā Sanskrit recogniser.</li>
-      <li><strong>The female voice</strong> comes from a sample made with
-        <a href="https://huggingface.co/bodhan-ai/indic-speak">Indic-Speak</a> (Bodhan AI / AI4Bharat), under the Bodhan
-        AI Open Model License. Its acceptable-use terms apply to everything made with Nandinī: no voice clones of real
-        people without their consent, and no robocalls or voice phishing.</li>
-    </ul>
+  <section id="vagdhenu">
+    <h2>Built on Vāgdhenu</h2>
+    <p class="lead">Nandinī is Vāgdhenu's chant in a new voice.</p>
+    <div class="appcard">
+      <p class="app-sanskrit">॥ वाचं धेनुमुपासीत ॥</p>
+      <div class="app-name">Vāgdhenu</div>
+      <p class="app-desc">A meter-aware Sanskrit chant system by Prof. Prathosh A P, Indian Institute of Science,
+        Bengaluru. Nandinī learned from Vāgdhenu's recordings, re-voiced, and chants through Vāgdhenu's own system,
+        so it keeps his tune and timing in a female voice.</p>
+      <div class="pills">
+        <a class="pill primary" href="https://prathosh.in/vagdhenu/">Vāgdhenu website ↗</a>
+        <a class="pill" href="https://github.com/prathoshap/vagdhenu">Code ↗</a>
+      </div>
+    </div>
   </section>
 
   <footer>
-    Nandinī builds on <strong>Vāgdhenu</strong> by Prof. Prathosh A P, IISc Bengaluru.<br>
-    Code and model Apache-2.0 · dataset CC-BY-4.0 · base models AI4Bharat IndicF5 &amp; NVIDIA BigVGAN-v2 (MIT).
+    <p>Nandinī builds on <strong>Vāgdhenu</strong> by Prof. Prathosh A P, IISc Bengaluru: its recordings
+      (<a href="https://huggingface.co/datasets/prathoshap/vagdhenu-data">CC-BY-4.0</a>), system and training recipe.</p>
+    <p>Code and weights Apache-2.0 · dataset CC-BY-4.0 · base models AI4Bharat IndicF5 &amp; NVIDIA BigVGAN-v2 (MIT).</p>
+    <p>The female voice comes from a sample made with <a href="https://huggingface.co/bodhan-ai/indic-speak">Indic-Speak</a>
+      (Bodhan AI / AI4Bharat). Its terms apply to everything made with Nandinī: no voice clones of real people without
+      their consent, and no robocalls or voice phishing.</p>
+    <p>Sample verses 7–10 from the <a href="https://github.com/OliverHellwig/sanskrit">Digital Corpus of Sanskrit</a>
+      (Oliver Hellwig, CC BY 4.0).</p>
   </footer>
 </div>
 <script>
@@ -295,11 +391,98 @@ uv run nandini chant --backend mlx --text "..."</code></pre>
       if (stage && !/ERROR|NO_APP_FILE|CONFIG_ERROR|PAUSED|STOPPED|DELETING/.test(stage)) frame.src = DEMO; else down();
     })
     .catch(down);
-  // copy buttons
-  document.querySelectorAll("button.copy").forEach(function(b){
-    b.addEventListener("click", function(){
-      var code = b.parentElement.querySelector("code").innerText;
-      navigator.clipboard.writeText(code).then(function(){ b.textContent = "Copied"; setTimeout(function(){ b.textContent = "Copy"; }, 1500); });
+  // Seekable players: each clip is downloaded whole and played from memory (a blob URL), so the player can seek
+  // anywhere even on servers that ignore Range requests. Clips load as their card comes near the screen.
+  var blobs = {};
+  function load(url){
+    if (!blobs[url]) blobs[url] = fetch(url).then(function(r){ if (!r.ok) throw r.status; return r.blob(); })
+      .then(function(b){ return URL.createObjectURL(b); })
+      .catch(function(){ delete blobs[url]; return url; });
+    return blobs[url];
+  }
+  function show(audio, url, play){
+    return load(url).then(function(u){
+      if (audio.dataset.want !== url || audio.src === u) return;
+      // the same clip swapped for its in-memory copy (it may already be playing): keep the place and keep playing
+      var same = audio.dataset.cur === url, wasPlaying = !audio.paused, t = audio.currentTime;
+      audio.dataset.cur = url;
+      audio.src = u;
+      if (same && t > 0) audio.addEventListener("loadedmetadata", function(){ audio.currentTime = t; }, {once: true});
+      if (play || (same && wasPlaying)) audio.play();
+    });
+  }
+  var cards = document.querySelectorAll(".clip");
+  cards.forEach(function(c){
+    var audio = c.querySelector("audio");
+    var buttons = c.querySelectorAll(".voices button");
+    audio.dataset.want = audio.dataset.cur = buttons[0].dataset.src;
+    // voice switch: swap the player's clip, and keep playing if it was playing
+    buttons.forEach(function(b){
+      b.addEventListener("click", function(){
+        if (b.classList.contains("on")) return;
+        var playing = !audio.paused;
+        buttons.forEach(function(x){ x.classList.remove("on"); x.setAttribute("aria-pressed", "false"); });
+        b.classList.add("on"); b.setAttribute("aria-pressed", "true");
+        c.querySelector(".player").classList.toggle("v", b.dataset.voice === "v");
+        c.classList.toggle("v", b.dataset.voice === "v");
+        audio.pause();
+        audio.dataset.want = b.dataset.src;
+        show(audio, b.dataset.src, playing);
+      });
+    });
+  });
+  function prime(c){
+    var audio = c.querySelector("audio");
+    c.querySelectorAll(".voices button").forEach(function(b){ load(b.dataset.src); });
+    show(audio, audio.dataset.want, false);
+  }
+  if ("IntersectionObserver" in window){
+    var io = new IntersectionObserver(function(es){
+      es.forEach(function(e){ if (e.isIntersecting){ io.unobserve(e.target); prime(e.target); } });
+    }, {rootMargin: "400px"});
+    cards.forEach(function(c){ io.observe(c); });
+  } else cards.forEach(prime);
+  // custom controls: play/pause, a seek bar and the time, driving the hidden <audio>
+  function fmt(x){ x = Math.max(0, Math.floor(x || 0)); return Math.floor(x / 60) + ":" + ("0" + x % 60).slice(-2); }
+  cards.forEach(function(c){
+    var audio = c.querySelector("audio"), play = c.querySelector(".play"), seek = c.querySelector(".seek"),
+        time = c.querySelector(".time"), dragging = false, raf = 0;
+    var syl = c.querySelectorAll(".verse .sy"), verse = c.querySelector(".verse"), lit = -2;
+    function times(){ return JSON.parse(c.querySelector(".voices button.on").dataset.t); }
+    function light(t){
+      // the syllable being chanted at time t: the last one that has started (none before the first, or at rest)
+      var ts = times(), k = -1;
+      if (!audio.paused || t > 0) { while (k + 1 < ts.length && ts[k + 1] <= t + 0.03) k++; }
+      var going = !audio.paused || t > 0;
+      if (k === lit && verse.classList.contains("going") === going) return;
+      lit = k;
+      verse.classList.toggle("going", going);
+      syl.forEach(function(s, i){ s.classList.toggle("now", i === k && going); s.classList.toggle("done", i < k); });
+    }
+    syl.forEach(function(s, i){
+      s.addEventListener("click", function(){
+        var go = function(){ audio.currentTime = times()[i] + 0.01; audio.play(); };
+        if (audio.readyState >= 1) go(); else audio.addEventListener("loadedmetadata", go, {once: true});
+      });
+    });
+    function paint(){
+      var d = audio.duration || 0, t = dragging ? seek.value / 1000 * d : audio.currentTime;
+      light(t);
+      if (!dragging) seek.value = d ? Math.round(t / d * 1000) : 0;
+      seek.style.setProperty("--p", (seek.value / 10) + "%");
+      time.textContent = fmt(t) + " / " + fmt(d);
+    }
+    function loop(){ paint(); if (!audio.paused) raf = requestAnimationFrame(loop); }
+    play.addEventListener("click", function(){ if (audio.paused) audio.play(); else audio.pause(); });
+    audio.addEventListener("play", function(){ play.classList.add("on"); play.setAttribute("aria-label", "Pause"); cancelAnimationFrame(raf); loop(); });
+    audio.addEventListener("pause", function(){ play.classList.remove("on"); play.setAttribute("aria-label", "Play"); paint(); });
+    audio.addEventListener("ended", function(){ audio.currentTime = 0; paint(); });
+    ["loadedmetadata", "durationchange", "seeked", "emptied", "timeupdate"].forEach(function(e){ audio.addEventListener(e, paint); });
+    seek.addEventListener("input", function(){ dragging = true; paint(); });
+    seek.addEventListener("change", function(){
+      dragging = false;
+      if (audio.duration) audio.currentTime = seek.value / 1000 * audio.duration;
+      paint();
     });
   });
   // one player at a time
