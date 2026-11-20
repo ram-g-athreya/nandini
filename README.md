@@ -10,6 +10,10 @@ Nandinī is made in two parts:
    needs, the reference bank and the vocoder, are remade for the new voice. The result runs in Vāgdhenu's renderer
    unchanged.
 
+**[Website and live demo](https://ram-g-athreya.github.io/nandini/)** ·
+**[Model](https://huggingface.co/ramgathreya/nandini)** ·
+**[Dataset](https://huggingface.co/datasets/ramgathreya/nandini-data)**
+
 ## Setup
 
 Install [uv](https://docs.astral.sh/uv/) and run every command from this folder. Set up only what you need:
