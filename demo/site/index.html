@@ -130,15 +130,17 @@
   footer p{margin:.35rem auto;max-width:44em}
   footer strong{color:#5e4c56}
   @media(max-width:560px){h1{font-size:2.5rem}body{font-size:17px}.demo iframe{height:960px}}
-  /* a mandala in the bottom-right corner of large screens, only a quarter of it on screen, turned by scrolling */
+  /* a mandala in the bottom-right corner of large screens, only a quarter of it on screen; scrolling turns its
+     outer layer one way and its inner layer the other */
   .mandala{--mo:.42;position:fixed;right:-300px;bottom:-300px;width:600px;height:600px;z-index:0;pointer-events:none;
-      opacity:var(--mo);will-change:transform,opacity}
+      opacity:var(--mo)}
+  .mandala img{position:absolute;inset:0;width:100%;height:100%;will-change:transform}
   header.hero,.wrap{position:relative;z-index:1}
   @media(max-width:899px){.mandala{display:none}}  /* large screens only */
 </style>
 </head>
 <body>
-<img class="mandala" id="mandala" src="mandala.svg" alt="" aria-hidden="true" loading="lazy">
+<div class="mandala" id="mandala" aria-hidden="true"><img src="mandala-outer.svg" alt="" loading="lazy"><img src="mandala-inner.svg" alt="" loading="lazy"></div>
 <header class="hero">
   <div class="wrap">
     <p class="sanskrit">॥ नन्दिनी ॥</p>
@@ -494,13 +496,19 @@
       paint();
     });
   });
-  // The corner mandala (mandala.svg, from make_mandala.py; large screens only), turned with the scroll position:
-  // scrolling down turns it clockwise, scrolling up turns it back. Still for visitors who ask for reduced motion.
+  // The corner mandala (make_mandala.py; large screens only), in two layers turned with the scroll position:
+  // scrolling down turns the outer layer clockwise and the inner one anticlockwise, scrolling up turns them back.
+  // Still for visitors who ask for reduced motion.
   (function(){
-    var svg = document.getElementById("mandala");
-    if (!svg || (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches)) return;
-    var queued = false;
-    function turn(){ queued = false; svg.style.transform = "rotate(" + (window.scrollY * 0.06).toFixed(2) + "deg)"; }
+    var box = document.getElementById("mandala");
+    if (!box || (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches)) return;
+    var layers = box.querySelectorAll("img"), queued = false;
+    function turn(){
+      queued = false;
+      var a = window.scrollY * 0.06;
+      layers[0].style.transform = "rotate(" + a.toFixed(2) + "deg)";
+      layers[1].style.transform = "rotate(" + (-a).toFixed(2) + "deg)";
+    }
     window.addEventListener("scroll", function(){ if (!queued){ queued = true; requestAnimationFrame(turn); } }, {passive: true});
     turn();
   })();
