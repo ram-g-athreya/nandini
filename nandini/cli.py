@@ -23,11 +23,12 @@
   nandini test-verses [--out manifests/test_verses.csv]          set B: verses outside the dataset, from DCS (CC BY 4.0)
   nandini compare    render --system V|Vs|N [...] | score        Nandinī against Vāgdhenu on his website's path
   nandini onnx       make | check graphs|verses|score | render   the ONNX version of Nandinī (no torch to render)
+  nandini chant      --text T [--backend torch|onnx|mlx] [--compact] [--model nandini-model]   one verse with the released model
   nandini female-bank [--run out] [--kept K.csv] [--audio-dir D] [--out training/female_bank]   reference cuts, her voice
   nandini config     print the settings (nandini/config.py)
 
 training-data, warm-start, train, extract-ema, the checks' render steps and every vocoder step but score run in the training
-environment (external/train-env, README, Training; the vocoder adds third_party/vocoder-requirements.txt); started from another Python they re-run themselves there (--train-python chooses another).
+environment (external/train-env, README, Setup, PyTorch; the vocoder adds third_party/vocoder-requirements.txt); started from another Python they re-run themselves there (--train-python chooses another).
 
 Every setting is in nandini/config.py. The options here only say which clips to run and where files go.
 """
@@ -108,7 +109,7 @@ def _in_train_env(a, argv):
         return
     py = Path(a.train_python or X.TRAIN_PYTHON)
     if not py.exists():
-        sys.exit(f"{a.command} needs the training environment ({', '.join(needs)}): make it (README, Training) or pass "
+        sys.exit(f"{a.command} needs the PyTorch environment ({', '.join(needs)}): make it (README, Setup, PyTorch) or pass "
                  f"--train-python")
     env = {**os.environ, "PYTHONPATH": os.pathsep.join([str(C.ROOT), os.environ.get("PYTHONPATH", "")]).rstrip(os.pathsep)}
     sys.exit(subprocess.run([str(py), "-m", "nandini.cli", *argv], env=env).returncode)
@@ -346,6 +347,16 @@ def main(argv=None):
                    help="drawn verses (default: manifests/test_verses.csv; _pool.csv and _report.md beside it)")
     train_python(p)
 
+    p = sub.add_parser("chant", help="one verse to a wav with the released model (downloads it on first use)")
+    p.add_argument("--text", help="a verse in Devanagari (lines split at daṇḍas or newlines)")
+    p.add_argument("--backend", choices=["torch", "onnx", "mlx"], default="torch", help="default torch")
+    p.add_argument("--compact", action="store_true", help="onnx: the smaller int8 files (an approximation)")
+    p.add_argument("--meter", help="default: detected, else vasantatilakā")
+    p.add_argument("--seed", type=int, default=C.WEB_SEED, help=f"default {C.WEB_SEED}, his website's")
+    p.add_argument("--device", default="auto", help="torch: cuda, mps or cpu (default: the first available)")
+    p.add_argument("--model", default=str(C.ROOT / "nandini-model"), help="the downloaded model (default: nandini-model)")
+    p.add_argument("--out", default="out.wav", help="default out.wav")
+
     sub.add_parser("config", help="print the settings")
 
     a = ap.parse_args(argv)
@@ -394,6 +405,10 @@ def main(argv=None):
             return
         from .training import data, ema, train, warm
         {"training-data": data, "warm-start": warm, "train": train, "extract-ema": ema}[a.command].run(a)
+        return
+    if a.command == "chant":
+        from .chant import run
+        run(a, argv)
         return
     if a.command == "female-bank":
         from .pipeline.female_bank import run

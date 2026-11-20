@@ -1,4 +1,4 @@
-"""Smaller ONNX files (PLAN-free summary: README, "The ONNX version"). Training environment for the AdaLN step.
+"""Smaller ONNX files (README, "Making the ONNX version"). Training environment for the AdaLN step.
 
   nandini onnx small --ema EMA [--onnx training/onnx]
 

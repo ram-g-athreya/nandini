@@ -7,6 +7,9 @@
 /pitch_shift/
 /training/
 
+# The released model, downloaded as the README's Use the released model section shows
+/nandini-model
+
 # Python
 __pycache__/
 *.pyc

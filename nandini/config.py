@@ -88,6 +88,8 @@ INDICF5_BASE_REV = "fb652a96e508091045890dae5bb99fe511facbcf"
 VAGDHENU_WEIGHTS_REPO = "prathoshap/vagdhenu"  # his released models; his BigVGAN is loaded by the renderer, then unused
 VAGDHENU_WEIGHTS_REV = "0b8b7474c1899471b3d2b6a3ee919ab6c9373ebc"
 VOCAB_SHA256 = "d3a5ff6aac12ea4fb50628a66a97b20c1e83b9e5ca356e5afae17b511cda96df"  # his reference_bank/vocab.txt
+MODEL_REPO = "ramgathreya/nandini"  # the released Nandinī model, which `nandini chant` downloads
+MODEL_REV = "10a125355a3128751d9c0819db889c21c580556c"
 
 # The ONNX version (`nandini onnx`): fp32 graphs at this opset; the per-graph check's bar is the largest difference
 # against torch as a share of the output's range.

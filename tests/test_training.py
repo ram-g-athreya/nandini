@@ -57,7 +57,7 @@ def test_training_commands_need_the_training_environment(tmp_path, monkeypatch):
     monkeypatch.setattr(external, "TRAIN_PYTHON", tmp_path / "none" / "python")
     real = importlib.util.find_spec
     monkeypatch.setattr(importlib.util, "find_spec", lambda m, *a: None if m in ("f5_tts", "accelerate") else real(m, *a))
-    with pytest.raises(SystemExit, match="training environment"):
+    with pytest.raises(SystemExit, match="PyTorch environment"):
         cli.main(["warm-start"])
 
 

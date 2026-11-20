@@ -10,628 +10,145 @@ Nandinī is made in two parts:
    needs, the reference bank and the vocoder, are remade for the new voice. The result runs in Vāgdhenu's renderer
    unchanged.
 
-## How it works
-
-### Making the dataset
-
-![How each clip is made: up to 10 candidates per verse, each a voice conversion, melody step and recogniser check](docs/dataset_pipeline.png)
-
-Each verse gets up to 10 candidates (`nandini generate`):
-
-- **Voice conversion:** a voice converter (IndicVoiceChanger) turns Vāgdhenu's recording into the voice of a 25 s
-  sample. Each candidate uses its own fixed seed, so every run makes the same conversions.
-- **Melody step:** the converter keeps the new voice but drifts from the chant's pitch, so the clip is resynthesised
-  with WORLD on Vāgdhenu's pitch, raised by k semitones (one k per chant style: +6.74 and +6.58), with his voicing and
-  loudness. His timing is kept as it is.
-- **Recogniser check:** [Su-śrotā](https://huggingface.co/prathoshap/sushrota-sanskrit-asr) transcribes both the clip
-  and Vāgdhenu's recording. An **error** is a syllable it hears right in his recording and wrong in the clip, so its
-  own mistakes on his chant aren't counted against the clip.
-- **Keep or retry:** the first candidate with at most 1 error is kept; if none of the 10 gets there, the one with the
-  fewest errors.
-- **Re-check in halves** (`nandini recheck-halves`): on long verses the recogniser can lose its place and misread a
-  whole stretch of a good clip. So each verse that missed has its 10 candidates checked again, with each half verse
-  transcribed on its own. If a candidate now has at most 1 error, the first such candidate replaces the kept one.
-
-All 1,467 verses are kept, so the dataset has the same verses, styles and meters as Vāgdhenu's: 1,298 (88.5%) with at
-most 1 syllable wrong.
-
-### Training the voice
-
-Vāgdhenu's renderer makes chant from three parts: a model, a reference bank and a vocoder. Each is remade for the new
-voice, and nothing else changes ([Training](#training)):
-
-- **The model:** IndicF5 fine-tuned on the 1,467 clips with Vāgdhenu's training script and settings, unchanged, to his
-  length (14,800 steps; the EMA weights are used, as his are).
-- **The reference bank:** for each meter, his renderer copies melody and pace from a short reference clip. The same cuts
-  are taken from the same verses of the new dataset, so only the voice differs from his bank.
-- **The vocoder:** turns the model's mel spectrogram into sound. IndicF5's own vocoder (vocos) adds a shiver on long held
-  notes, and Vāgdhenu's fine-tuned BigVGAN adds an echo on a female voice, so BigVGAN-v2 is fine-tuned on the new clips
-  the way he fine-tuned it on his.
-
-Checks after training confirm the model speaks and that training had levelled off. It is then compared with
-Vāgdhenu's own models on 60 verses neither has seen ([Comparing with Vāgdhenu](#comparing-with-vāgdhenu)).
-
-## What's in this folder
-
-Everything runs through one command, `nandini`, with every setting in one file, `nandini/config.py`.
-
-| Path | What it is |
-|:--|:--|
-| `nandini/cli.py` | the `nandini` command and its subcommands |
-| `nandini/config.py` | every setting the released audio was made with |
-| `nandini/dataset.py` | the source recordings: where a clip's audio is, which clips a run covers, output paths |
-| `nandini/pipeline/manifest.py` | `nandini manifest`: writes a manifest of clips with fixed indices |
-| `nandini/pipeline/generate_dataset.py` | `nandini generate`: makes the dataset (the loop above) |
-| `nandini/pipeline/recheck_halves.py` | `nandini recheck-halves`: the verses that missed, re-checked in halves; the final kept list |
-| `nandini/analysis/inventory.py` | `nandini inventory`: measures how the converter gets syllables wrong, on a sample of clips |
-| `nandini/analysis/inventory_report.py` | the inventory's report |
-| `nandini/analysis/marks.py` | `nandini mark`: what the ASR hears on each kept verse, per syllable, with timings |
-| `nandini/analysis/tables.py` | `nandini tables`: transcripts, per-syllable and substitution tables |
-| `nandini/analysis/dataset_report.py` | `nandini report`: the dataset report and its charts |
-| `nandini/analysis/selection.py` | `nandini selection`: the selection rule simulated on the inventory, and ≤ 1 against 0 errors |
-| `nandini/analysis/melody_checks.py` | `nandini melody-checks`: timing, voicing, loudness and the boost cap |
-| `nandini/pipeline/pitch_shift.py`, `target_readings_worker.py` | `nandini pitch-shift`: how k per style was measured |
-| `nandini/listening/` | `nandini listen build` and `serve`: the listening page (`page.html`) and a local server that can seek |
-| `nandini/converter.py`, `converter_worker.py` | voice conversion, run in Seed-VC's own environment |
-| `nandini/melody.py` | the melody step (WORLD) |
-| `nandini/asr.py` | Su-śrotā transcription and per-syllable error marking |
-| `nandini/text.py` | Sanskrit text handling: transliteration and syllables |
-| `nandini/sounds.py` | sound classes, for grouping errors |
-| `nandini/voice.py` | voice consistency, from speaker embeddings |
-| `nandini/external.py` | `nandini fetch`: outside code into `external/` at pinned commits |
-| `nandini/training/data.py` | `nandini training-data`: each kept clip with Vāgdhenu's `model_text`, and IndicF5's dataset files |
-| `nandini/training/warm.py` | `nandini warm-start`: the warm start from the IndicF5 base, checked as his script loads it |
-| `nandini/training/train.py` | `nandini train`: his training script, unmodified, with his settings and length |
-| `nandini/training/ema.py` | `nandini extract-ema`: a checkpoint's EMA weights only |
-| `nandini/training/checks.py`, `nandini/analysis/training_checks.py` | `nandini speech-check` / `trend-check`: renders after training, and their scores |
-| `nandini/training/vocoder.py`, `nandini/analysis/vocoder_score.py`, `nandini/analysis/vocoder_measures.py` | `nandini vocoder`: the vocoder fine-tune, decoding saved mels, and its scores |
-| `nandini/onnx/` | `nandini onnx`: the ONNX version (`make`, `small`, `check`, and `render` without torch) |
-| `nandini/pipeline/female_bank.py` | `nandini female-bank`: his reference cuts, taken from the kept clips |
-| `tests/` | quick checks that need no models or downloads (`pytest`) |
-| `manifests/all_clips.csv` | all 1,467 clips: index, clip, style, meter, text |
-| `manifests/pitch_shift_verses.csv` | the 61 verses the target voice read to measure k |
-| `manifests/inventory_sample_clips.csv` | a 61-clip sample, stratified by meter within each style, for the inventory |
-| `manifests/training_check_verses.csv` | the 10 verses the checks after training render (seed 20261109) |
-| `manifests/released_kept.csv` | the kept candidate of every verse in the released dataset, as training used it |
-| `manifests/female_bank_overrides.csv` | the bank entries changed by hand, with reasons |
-| `manifests/test_verses.csv` | 60 new verses for evaluation, outside the dataset, from the Digital Corpus of Sanskrit (CC BY 4.0; [Test verses](#test-verses)) |
-| `manifests/test_verses_pool.csv`, `test_verses_report.md` | every candidate verse with its checks, and how the 60 were drawn |
-| `voice/female_voice_sample.wav` | the 25 s sample that sets the female voice |
-| `docs/dataset_pipeline.png`, `.tex` | the dataset diagram above, and its TikZ source |
-| `third_party/` | pinned requirements for the Seed-VC, Indic-Speak, training and ONNX environments, and a patch for Seed-VC on Apple silicon (GPL-3.0, like Seed-VC) |
-| `external/` | not in the repo (gitignored): outside code fetched by `nandini fetch`, and the Seed-VC and training environments |
-| `uv.lock` | the exact package versions of this code's environment for the release run |
-| `LICENSE`, `NOTICE` | the code's licence (Apache-2.0), and the parts with their own terms |
-
 ## Setup
 
-Four environments, because Seed-VC (which runs IndicVoiceChanger), Indic-Speak and Vāgdhenu's training code each need
-package versions of their own. [uv](https://docs.astral.sh/uv/) is assumed; the exact versions used for the release are
-pinned. Outside code is never copied into this repo: `nandini fetch` clones it into `external/` (gitignored) at the
-commits in `nandini/config.py` and checks each checkout's commit.
+Install [uv](https://docs.astral.sh/uv/) and run every command from this folder. Set up only what you need:
 
-**This code** (Python 3.10), from this folder:
+| To                                                     | Run                                  |
+| :----------------------------------------------------- | :----------------------------------- |
+| chant with the released model in PyTorch               | `scripts/setup_pytorch.sh`           |
+| chant with the released model in ONNX, without PyTorch | `scripts/setup_onnx.sh`              |
+| chant with the released model on Apple silicon (MLX)   | `scripts/setup_mlx.sh`               |
+| make the dataset                                       | `scripts/setup_seed_vc.sh`           |
+| train the voice and the vocoder                        | `scripts/setup_pytorch.sh --vocoder` |
 
-```bash
-uv sync                      # installs the versions in uv.lock and the `nandini` command; run commands as `uv run nandini ...`
-```
+Each script makes one environment under `external/` and fetches the outside code it needs (Vāgdhenu's, Seed-VC,
+BigVGAN) at the commits pinned in `nandini/config.py`; none of it is copied into this repo. Models and data download
+from Hugging Face on first use. Training starts from the IndicF5 base model, which is gated: accept its terms on
+[its model page](https://huggingface.co/ai4bharat/IndicF5) and log in.
 
-`uv.lock` resolves `pyproject.toml` as of the release run. Commands run from this folder, because the manifests and
-the voice sample are found relative to it. `python -m nandini.cli` works as well as `nandini`.
+## Use the released model
 
-**Seed-VC, running IndicVoiceChanger** (Python 3.10; needed by `generate` and `inventory convert`):
-
-```bash
-uv run nandini fetch seed-vc                         # external/seed-vc at SEED_VC_COMMIT
-uv venv --python 3.10 external/seed-vc/.venv
-uv pip install --python external/seed-vc/.venv/bin/python -r third_party/seed-vc-requirements.txt
-git -C external/seed-vc apply "$PWD/third_party/seed-vc-mps-float32.patch"    # Apple silicon only
-```
-
-`generate` and `inventory convert` then find it there; `--seed-vc DIR --seed-vc-python PY` point elsewhere. On Apple
-silicon also set `PYTORCH_ENABLE_MPS_FALLBACK=1`.
-
-**Training** (Python 3.10, Linux with NVIDIA GPUs for `train`; the other training commands also run on a Mac). Vāgdhenu's
-requirements at his commit, with the two fixes found when they were installed: torch held at 2.4.1 (one of his packages
-declares a newer torch, so a plain install would upgrade it), and `datasets`/`pyarrow` pinned (his list leaves them
-open, and newer versions break his code). `train-constraints.txt` holds every package's tested version.
+The trained voice is on Hugging Face: [`ramgathreya/nandini`](https://huggingface.co/ramgathreya/nandini) holds the
+model, the vocoder, the female reference bank, `vocab.txt`, and the ONNX files. The dataset it was trained on is
+[`ramgathreya/nandini-data`](https://huggingface.co/datasets/ramgathreya/nandini-data).
 
 ```bash
-uv run nandini fetch vagdhenu bigvgan                # his code at VAGDHENU_COMMIT; BigVGAN, which his renderer imports
-uv venv --python 3.10 external/train-env
-uv pip install --python external/train-env/bin/python torch==2.4.1 torchaudio==2.4.1 \
-    --index-url https://download.pytorch.org/whl/cu121          # on a Mac: leave out --index-url
-uv pip install --python external/train-env/bin/python --override third_party/train-overrides.txt \
-    -c third_party/train-constraints.txt -r third_party/train-requirements.txt
+uv run nandini chant --text "वसुदेवसुतं देवं कंसचाणूरमर्दनम् । देवकीपरमानन्दं कृष्णं वन्दे जगद्गुरुम् ॥" --out out.wav
+uv run nandini chant --backend onnx --text "..."             # without PyTorch; --compact for the smaller files
+uv run nandini chant --backend mlx --text "..."              # Apple silicon GPUs
 ```
 
-The training commands find it there and re-run themselves in it; `--train-python PY` points elsewhere. The IndicF5
-base model is gated: accept its terms on [its model page](https://huggingface.co/ai4bharat/IndicF5) and log in.
-
-**Indic-Speak** (Python 3.12; needed only by `pitch-shift readings`, to re-measure k). The model is gated: accept its
-licence on [its model page](https://huggingface.co/bodhan-ai/indic-speak) and log in with `huggingface-cli login`. Its
-code downloads with its weights.
-
-```bash
-uv venv --python 3.12 ../indic-speak-env
-uv pip install --python ../indic-speak-env/bin/python -r third_party/indic-speak-requirements.txt
-```
-
-Then pass `--indic-speak-python ../indic-speak-env/bin/python`.
-
-**Models and data** download from Hugging Face on first use, at the revisions pinned in `nandini/config.py`:
-- the Vāgdhenu dataset;
-- the converter, [IndicVoiceChanger](https://huggingface.co/DreamSyncCo/IndicVoiceChanger), a Seed-VC checkpoint;
-- Su-śrotā;
-- the speaker model, [ECAPA from SpeechBrain](https://huggingface.co/speechbrain/spkrec-ecapa-voxceleb).
-
-`--dataset-dir` reads the clips from a local copy instead.
-
-## Same results, not identical audio
-
-The same code, seeds and package versions give the same choices and nearly the same audio on another machine, but not
-identical files. Conversions differ slightly between GPUs, and between a GPU and Apple silicon. Even the melody step,
-which runs on the CPU, differs between Linux and macOS: re-making 610 clips on a Mac from the same conversions changed
-the level of 21 of them by more than 0.1 dB, with the same package versions. So a rerun on other hardware can keep a
-different candidate for some verses, or count an error more or fewer. Results on the same machine and environment are
-identical. The released audio was made on an NVIDIA A40 under Linux.
-
-## Getting the recordings
-
-The source recordings are the [Vāgdhenu dataset](https://huggingface.co/datasets/prathoshap/vagdhenu-data). It is
-public, needs no login, and is licensed CC-BY-4.0.
-
-**Automatically:** `nandini manifest`, `nandini generate` and `nandini inventory` download what they need from Hugging
-Face. They fetch the metadata and each clip the first time it is used, at the revision pinned in the config
-(`[dataset] revision`), and keep them in the Hugging Face cache. Nothing needs installing first.
-
-**All at once** (about 0.9 GB): useful on a cloud machine, or when several parts run in parallel:
-
-```bash
-huggingface-cli download prathoshap/vagdhenu-data --repo-type dataset \
-  --revision adda7747c1ea05c45e6b789d23d6b6bbf550918d --local-dir vagdhenu-data
-```
-
-Then pass `--dataset-dir vagdhenu-data` to the commands. The folder should look like this:
-
-```
-vagdhenu-data/
-  style_a/metadata.csv
-  style_a/audio/<clip>.wav     764 clips
-  style_b/metadata.csv
-  style_b/audio/<clip>.wav     703 clips
-```
-
-Use the pinned revision. A later revision could change clips or texts, and the manifests' fixed indices and the seeds
-derived from them would then no longer match the released audio.
-
-**Attribution:** audio made from these recordings is derived from Vāgdhenu, so credit Vāgdhenu and its authors when
-sharing it, as CC-BY-4.0 requires.
+- **First use** downloads the model into `nandini-model/` (and converts it once for MLX).
+- **Rendering** goes through Vāgdhenu's own renderer, with his text handling (Kannada routing, meter detection, pādas)
+  and Nandinī's voice, vocoder and reference bank. `--meter` overrides the detected meter; `--seed` defaults to 60, as
+  on his website.
+- **Speed** for a 10 s verse on a MacBook Air M2: about 1 minute with MLX, 3 minutes with PyTorch on MPS, 6 to 10
+  minutes with ONNX on the CPU.
+- **The compact ONNX files** (344 MB) are an approximation of the full set: their renders differ from it about as much
+  as another seed's do.
+- **From Python:** `nandini/chant.py` shows the renderer calls for each backend.
 
 ## Making the dataset
 
-```bash
-nandini generate
-```
-
-By default it runs every verse (`manifests/all_clips.csv`) into `out/`, with the settings in `nandini/config.py`.
-`nandini config` prints them.
-
-Candidate j converts the recording with seed 1000 · j + the verse's index, where the index is the verse's fixed position
-in the whole dataset. It then applies the melody step, which:
-- uses Vāgdhenu's pitch raised k semitones, with its voicing;
-- follows Vāgdhenu's frame energy, but caps any frame's boost at 6 dB above the clip's typical gain, which stops near-silent
-  stretches of a conversion from being blown up into spikes;
-- writes 24 kHz audio at −20 dBFS.
-
-Outputs:
-- `out/final/<style>__<clip>.wav`: the kept clip for each verse.
-- `out/settings_part*.json`: the settings the run used.
-- `out/attempts_part*.csv`: every candidate, with its seed and errors. The output files and columns call a candidate an *attempt* (`attempts`, `kept_j`).
-- `out/kept_part*.csv`: one row per verse, with the kept candidate, its errors, the candidates used, and whether it met the
-  bar.
-
-Every conversion and melody-step file is kept under `out/conversions/` and `out/melody/`.
-
-Then re-check the verses that missed:
+![How each clip is made: up to 10 candidates per verse, each a voice conversion, melody step and recogniser check](docs/dataset_pipeline.png)
 
 ```bash
-nandini recheck-halves
+nandini generate             # every verse -> out/
+nandini recheck-halves       # the verses that missed, re-checked with each half verse transcribed alone
 ```
 
-Each verse that missed the bar has its candidates on disk checked again in halves (below), against Vāgdhenu's recording
-checked the same way. The selection rule runs again on these scores: if a candidate now has at most 1 error, the first
-such candidate is kept instead; otherwise the verse keeps what `generate` kept. Verses that met the bar aren't touched.
-- `out/recheck_halves.csv`: every recording and candidate re-checked, with its errors in halves.
-- `out/kept_rechecked.csv`: the final kept list, one row per verse, with `scoring` (`whole` or `halves`) and `generate`'s choice
-  beside it (`whole_kept_j`, `whole_errors`, `whole_counted`). Later commands read this file when it's there.
-- `out/final/`: the clip is replaced where the kept candidate changed.
+- **Per verse:** up to 10 candidates. Each converts Vāgdhenu's recording to the voice of `voice/female_voice_sample.wav`
+  (seed 1000 · j + the verse's index), then puts his melody back with WORLD, raised k semitones. The first candidate
+  that [Su-śrotā](https://huggingface.co/prathoshap/sushrota-sanskrit-asr) hears with at most 1 syllable wrong is kept,
+  else the one with the fewest errors.
+- **Options:** `--part i/P` splits the run into parallel parts, `--indices a,b` runs a subset, and a stopped run
+  restarts where it left off. `--dataset-dir DIR` reads a local copy of Vāgdhenu's recordings.
+- **Outputs:** `out/final/` (the kept clips), `out/kept_rechecked.csv` (the kept list), `out/attempts_part*.csv` (every
+  candidate), `out/settings_part*.json`.
+- **As released:** one A40, 4 parts, about 19 hours; 1,298 of 1,467 verses at most 1 syllable wrong. The kept list is
+  `manifests/released_kept.csv`: conversions differ slightly between machines, so pass `--kept` with it to train on
+  exactly the released choice.
 
-Options:
-- `--part i/P` splits the run into P parallel parts.
-- `--indices a,b` runs a subset; `--manifest` and `--out` choose other clips or another folder.
-- A stopped run restarts where it left off.
-- `--scoring halves` scores every verse in halves from the start, instead of whole clips (see below). The release
-  scored whole clips and re-checked only the verses that missed.
-
-**Scoring in halves:** on some long verses Su-śrotā drops a stretch of a whole clip (verse 1343 reads with 16 or more
-errors whole and 1 in halves), which wrongly marks good candidates as bad. In halves, every recording and candidate is cut
-at the half-verse pause, each half is transcribed alone, and the two transcripts are
-joined and scored against the whole verse as before. The pause is found from Vāgdhenu's recording (the start of
-syllable n // 2, to 10 ms) and moved to the quietest 20 ms nearby in each clip. Errors, the bar and the rule are unchanged. It
-costs two transcriptions per clip, plus one timed transcription of Vāgdhenu's recording per verse.
-
-**How the released audio was made:**
-- **Hardware:** one A40, with 4 parts in parallel.
-- **Run size:** 4,766 candidates for 1,467 verses (3.25 per verse) in about 19 hours.
-- **Result:** 1,212 verses (82.6%) met the bar, 492 of them with no errors; the other 255 are kept with their best of
-  10.
-- **Error rate:** 2.19% of counted syllables are wrong. This count comes from the same ASR that chose each candidate, so
-  it is optimistic.
-- **Re-check in halves:** the 255 verses that missed were checked again in halves, on the same 10 candidates. 86 then had
-  a candidate with at most 1 error, and took the first such candidate (55 a different candidate, 31 the same one); the
-  other 169 kept their best of 10. Result: 1,298 verses (88.5%) at the bar, and 1.97% of counted syllables wrong (a
-  mix of whole and halves scoring).
-- **The released kept list:** `manifests/released_kept.csv`, in the format of `out/kept_rechecked.csv`. Training used it. A
-  rerun on other hardware can keep a different candidate for some verses ([Same results, not identical
-  audio](#same-results-not-identical-audio)), so `--kept manifests/released_kept.csv` trains on exactly the released
-  choice.
-
-**Why at most 1 error, not 0:** Su-śrotā misreads about 4.7% of syllables on Vāgdhenu's own recordings, so a single
-error in a verse (about 2% of a typical 46-syllable verse) is within the judge's own noise. On the 61-clip sample, a
-0-error rule needed about 1.7 times the candidates and lowered the error rate only from 2.1% to 1.7%.
-
-## Checking the dataset
-
-Everything after `nandini generate` works from its run folder (`out/`), plus Vāgdhenu's recordings, which come from
-`--dataset-dir` or the Hugging Face cache as before:
-
-| Data | Where it comes from |
-|:--|:--|
-| Vāgdhenu's recordings | `--dataset-dir`, else the Hugging Face cache (downloaded on first use) |
-| Nandinī's clips | `out/final/` |
-| Errors per verse | `out/kept_part*.csv` |
-| Errors per syllable, what the ASR heard, timings | `out/marks/`, written by `nandini mark` |
+To check a run:
 
 ```bash
-nandini mark            # re-runs Su-śrotā on both recordings of every kept verse -> out/marks/ (--part i/P to split)
-nandini tables          # -> out/tables/: transcripts.csv, syllables.csv.gz, substitutions.csv and .md
-nandini report          # -> out/kept.csv, out/attempts.csv, out/report/: report.md and three charts
-nandini listen build    # -> out/listen/index.html
-nandini listen serve    # then open http://localhost:8765/listen/
+nandini mark                 # Su-śrotā on both recordings of every kept verse -> out/marks/
+nandini tables               # -> out/tables/: transcripts, per-syllable and substitution tables
+nandini report               # -> out/report/: report.md and charts
+nandini listen build         # -> out/listen/index.html
+nandini listen serve         # then open http://localhost:8765/listen/
 ```
 
-- **The listening page** shows every verse with Vāgdhenu's recording, Nandinī's clip and the Devanagari text.
-  - **Marks:** red marks errors, grey dotted marks syllables wrong on both recordings, and hovering shows what the ASR
-    heard.
-  - **While playing,** the syllable being sung is highlighted.
-  - **Verdicts:** you can record a verdict and a note per verse. They're kept in the browser, with CSV export and
-    import.
-  - **Audio:** the page links to the audio wherever it is, so nothing is copied. Nandinī's clips play from
-    `out/final/`, and Vāgdhenu's through links in `out/listen/vagdhenu/`.
-  - **Serving:** the page needs the local server rather than opening the file directly, so the players can seek.
-- **Without marks,** the page still works, but shows the text without syllable marks.
-- **`nandini mark`** needs the ASR model but no GPU. It checks that each verse's error count matches the run's.
-- **From the released dataset:** the dataset uses the same layout, so `--run` can point at a downloaded copy. That
-  needs neither the converter nor the ASR.
-
-## Measuring the converter's failures
-
-`nandini inventory` measures how often the converter gets syllables wrong and why. It was used to choose the settings above.
-For each clip in a manifest (the 61-clip sample; `manifests/all_clips.csv` runs the same way):
-
-1. Convert the recording 10 times, with the same seeds as `nandini generate`.
-2. Make a second version of each conversion with the melody step.
-3. Transcribe Vāgdhenu's recording, every conversion and every melody-step version with Su-śrotā, and mark each
-   syllable right or wrong against the text. Syllables Su-śrotā gets wrong on Vāgdhenu's own recording are left out
-   of the counts.
-4. Measure voice consistency with speaker embeddings over 2 s windows.
-
-```bash
-nandini inventory convert
-nandini inventory score
-nandini inventory report
-```
-
-The report gives:
-- failure rates, and failures per sound class;
-- how many conversions each failing syllable fails in;
-- where a failure comes from (the converter or the melody step);
-- how many failing syllables extra conversions rescue (3, 5, 7, 10);
-- voice consistency;
-- every headline measure per style, beside the ASR's error rate on Vāgdhenu's own recording.
-
-By default it runs the 61-clip sample into `inventory/`. `--part`, `--indices`, `--clips` and `--dataset-dir` work as
-for `nandini generate`.
-
-## How the settings were chosen
-
-These reproduce the measurements behind `nandini/config.py`. None of them is needed to make the dataset.
-
-**The pitch shift k per style** (`K_SEMITONES`). The target voice reads 61 verses, and k is the gap between the mean log
-pitch of those readings and that of Vāgdhenu's clips, per style:
-
-```bash
-nandini pitch-shift draw                 # the verses to read (as in manifests/pitch_shift_verses.csv)
-nandini pitch-shift readings --indic-speak-python path/to/indic-speak-env/bin/python
-nandini pitch-shift check                # token cap and Su-śrotā character error rate per reading
-nandini pitch-shift vagdhenu             # Vāgdhenu's pitch, all clips
-nandini pitch-shift target               # the readings' pitch
-nandini pitch-shift report               # k per style with bootstrap intervals -> pitch_shift/report.md
-```
-
-- **The readings need Indic-Speak.** It is gated: accept its licence on Hugging Face first. It also runs in its own
-  environment, like Seed-VC; the model's code downloads with its weights.
-- **The released readings were made on Apple silicon** (`--device mps`). The other steps need only this package.
-
-**The selection rule and the melody step**, on the inventory's clips (`nandini inventory convert` and `score`):
-
-```bash
-nandini selection simulate               # the rule on the inventory's candidates -> inventory/selection/
-nandini selection threshold              # stopping at ≤ 1 error against 0, and Su-śrotā's misreads on Vāgdhenu
-nandini melody-checks timing             # voicing-based timing check (inconclusive on chant; see its report)
-nandini melody-checks voicing            # where the melody step imposes Vāgdhenu's voicing
-nandini melody-checks loudness           # how much the loudness matching changes each conversion
-nandini melody-checks loudness-cap       # without the 6 dB boost cap against with it (re-scores with Su-śrotā)
-```
-
-`--listen` cuts short listening clips around the worst stretches (Vāgdhenu, the conversion, the melody step).
+The listening page plays Vāgdhenu's recording and Nandinī's clip for every verse, with the text and the syllables
+Su-śrotā got wrong. `--run` points these commands at a downloaded copy of the released dataset.
 
 ## Training
 
-Vāgdhenu's own recipe, unchanged: his `finetune_indicf5.py` (fetched into `external/vagdhenu`, not copied), his
-settings (learning rate 1e-5, warm-up 500, 19,200 frames per GPU, 600 epochs, bf16, 2 GPUs) and his length: his
-released model (`voice_armA`) is the EMA checkpoint at step 14,800, and so is this one.
+Vāgdhenu's training script and settings, unchanged, to his length (EMA weights at step 14,800). The commands re-run
+themselves in the PyTorch environment; `train` needs NVIDIA GPUs.
 
 ```bash
-nandini training-data                    # out/ -> training/dataset/: model_text, checks, raw.arrow + duration.json
-nandini warm-start                       # training/warm.pt from the IndicF5 base, checked (0 missing, 0 unexpected)
-nandini train                            # training/run/: stops after step 14,800; EMA kept every 2,000 and at 14,800
-nandini female-bank                      # training/female_bank/: his reference cuts in her voice, each scored
+nandini training-data        # out/ -> training/dataset/ (add --kept manifests/released_kept.csv for the released choice)
+nandini warm-start           # training/warm.pt from the IndicF5 base
+nandini train                # training/run/: stops after step 14,800; EMA weights every 2,000 steps
+nandini female-bank          # training/female_bank/: one reference clip per meter, in the new voice
 ```
 
-- **Text:** his `model_text` of each verse (punctuation stripped, Kannada script, no sandhi), as his training read it.
-  Every character must be in his `vocab.txt` (IndicF5 silently reads unknown ones as a space), except vocalic ḷ in one
-  word of one clip, which his own trainer read as a space too.
-- **`train`:** his script through `accelerate launch`. Beside it, the EMA weights of the kept steps are extracted and the
-  other checkpoints deleted (each is 5.4 GB). It stops on a wrong warm-start line, a step count that hasn't moved for
-  10 minutes, or a nearly full disk. `--nccl-p2p-off` is for hosts where the first GPU-to-GPU transfer hangs.
-  IndicF5 can't resume from its own checkpoints, so a run folder that already holds some is refused, not deleted.
-- **The female bank:** his renderer copies voice, melody and pace from a meter-matched reference clip in its bank. The
-  same cuts are taken from the kept clips, so only the voice changes; `manifests/female_bank_overrides.csv` lists the
-  three entries changed by hand and why.
-- **Run folder:** `training-data` and `female-bank` read `out/`: its `kept_rechecked.csv` (after `recheck-halves`, else its
-  `kept_part*.csv`) and `final/`. `--kept` and `--audio-dir` read another kept list, such as
-  `manifests/released_kept.csv`.
-- **Where files go:** the default folders (`out/`, `training/`, `inventory/`, `pitch_shift/`) are inside this folder,
-  wherever a command is run from, so the commands find each other's outputs without flags. All are gitignored.
-
-**Checks after training** (render in the training environment, score in this one):
+Checks after training:
 
 ```bash
-nandini speech-check render --ema training/run/ema/ema_14800.pt    # 3 training verses: does the model speak?
-nandini speech-check score                                          # every render at most 30% character errors
+nandini speech-check render --ema training/run/ema/ema_14800.pt
+nandini speech-check score
 nandini trend-check render --ema training/run/ema/ema_12000.pt training/run/ema/ema_14800.pt
-nandini trend-check score                                           # 12,000 against 14,800: still improving or levelled off
+nandini trend-check score
 ```
 
-The trend check renders the 10 check verses (`manifests/training_check_verses.csv`) exactly as his website does, with the
-female bank and vocos (his BigVGAN adds a frame-rate buzz on a female voice). The score is Su-śrotā's error rate against
-the text, with a paired bootstrap over the verses, plus voice consistency against the training clips, reported without
-pass/fail. These are training verses: the checks show that the model speaks and that training levelled off, not that it
-generalises.
-
-**As released:** RunPod, 2 × RTX A6000 (48 GB each): 0.88 s per step, 216 min for 14,800 steps. Vāgdhenu's code was at commit c18927a for the
-release run; it is now pinned at 8bd7733, which leaves its training script, text preparation and renderer unchanged (the
-renderer's text helpers moved to `chant_text.py`) and adds the MLX backend.
-
-**The vocoder.** The model makes a mel spectrogram; a vocoder turns it into sound. Vocos (IndicF5's own) adds a shiver on
-long held notes, which is why Vāgdhenu fine-tuned NVIDIA's BigVGAN-v2 on IndicF5's mel of his voice. His BigVGAN adds a
-frame-rate echo on a female voice, so it is fine-tuned again, on these clips, the way he made his: IndicF5's mel of
-every training clip, NVIDIA's `train.py` unchanged in its fine-tuning mode with its v2 config, and the final weights the
-average of the last 6 checkpoints. It starts from his generator and NVIDIA's released discriminators.
+**The vocoder:** Vāgdhenu's BigVGAN, fine-tuned again on these clips with NVIDIA's `train.py`, unchanged
+(`scripts/setup_pytorch.sh --vocoder` installs what it needs):
 
 ```bash
-uv pip install --python external/train-env/bin/python -c third_party/train-constraints.txt -r third_party/vocoder-requirements.txt
-nandini vocoder data                     # IndicF5 mels of the training clips, and NVIDIA's file lists
-nandini vocoder align                    # before training: his BigVGAN on 3 training-style mels (timing and echo)
-nandini vocoder score --align            #   ... and whether it keeps the words
+nandini vocoder data         # IndicF5 mels of the training clips
 nandini trend-check render --ema training/run/ema/ema_14800.pt --verses V.csv --save-mel --out M   # mels to monitor
-nandini vocoder train &                  # NVIDIA's train.py; runs until the monitor stops it
-nandini vocoder monitor --mels M         # every 2,500 steps: echo and shiver; stops when levelled off; averages
-nandini vocoder decode --mels T --vocoder training/vocoder/run/vocoder.pt --out D   # any saved mels, any vocoder
-nandini vocoder score --decoded vocos=D1 fine-tune=D2 --verses T/verses.csv --out R  # the pass rule
+nandini vocoder train &
+nandini vocoder monitor --mels M
 ```
 
-- **A step** is one update on 4 random 2.73 s chunks, each from one clip, so about 367 steps go through every clip once.
-- **The monitor** stops at the first check from step 10,000 where the echo rule holds and shiver hasn't changed over the
-  last 5,000 steps (paired bootstrap), or at 30,000 steps.
-- **The pass rule:** on renders the monitor never saw, no echo (mean ≤ 0.02, each ≤ 0.04), shiver below vocos's, and
-  character errors at most vocos's + 0.25 points.
-- **Measures:** echo is the frame-rate peak in the cepstrum; shiver is the share of a held note's loudness modulation at
-  5–30 Hz (`nandini/analysis/vocoder_measures.py`).
-- `decode` joins each verse's pieces as his renderer does: with vocos it reproduces the render exactly.
+Run `train` and `monitor` together. Every 2,500 steps the monitor measures echo and shiver, and once they level
+off it stops training and averages the last 6 checkpoints into the final vocoder.
 
-**Rendering on Apple silicon (MLX).** Vāgdhenu's code includes an MLX backend (added by
-[aieunlabs](https://github.com/aieunlabs) in Vāgdhenu's pull request #22), which runs the model and BigVGAN natively on
-Apple GPUs with no torch at render time. It takes Nandinī's weights unchanged. Convert them once (this step needs torch,
-which this code's environment has), then render with the female bank:
+As released: 2 × RTX A6000, 216 minutes for the model; 2 × A40 for the vocoder.
 
-```bash
-uv venv external/mlx-env && uv pip install --python external/mlx-env/bin/python -r external/vagdhenu/requirements-mlx.txt
-PYTHONPATH=external/vagdhenu/src .venv/bin/python -m vagdhenu_mlx.convert --voice training/run/ema/ema_14800.pt \
-    --vocoder training/vocoder/run/vocoder.pt --vocab external/vagdhenu/src/reference_bank/vocab.txt --out training/mlx
-```
+## Making the ONNX version
 
-```python
-import sys; sys.path.insert(0, "external/vagdhenu/src")
-from vagdhenu_mlx import Renderer, detect_meter_key
-r = Renderer("training/mlx", bank_path="training/female_bank/bank.json")
-text = "वसुदेवसुतं देवं कंसचाणूरमर्दनम् । देवकीपरमानन्दं कृष्णं वन्दे जगद्गुरुम् ॥"
-sr, audio = r.render_one(text, detect_meter_key(text) or "vasantatilakā", seed=60)
-```
-
-On a MacBook Air M2, a 10 to 12 s verse took 47 to 60 s; on 5 test verses the character error rate, voice and pitch
-matched the torch renders. Pass `bank_path`: his `render_mlx.py` script uses his own bank, which would give his voice's
-melody references. The port renders a verse's pādas in one batch and runs the model in bfloat16, so its audio is close
-to, not identical with, the torch renderer's.
-
-## The ONNX version
-
-Nandinī also comes as ONNX files, so it runs with onnxruntime and no PyTorch. The renderer (`nandini/onnx/render.py`)
-follows Vāgdhenu's own renderer step by step: his text front end, meter choice, reference bank, sampler, retry rule,
-gate and stitching. Only the model and the vocoders run in ONNX.
-
-| File | What it is | Inputs → outputs |
-|:--|:--|:--|
-| `nandini_dit.onnx` (1,358 MB) | the transformer, one evaluation | `x`, `cond`, `text`, `t` → `flow` |
-| `nandini_vocoder.onnx` (451 MB) | the fine-tuned BigVGAN | `mel` → `wave` |
-| `vocos_spectrum.onnx` (54 MB) | IndicF5's stock vocos, up to its spectrum | `mel` → `real`, `imag` |
-
-- **The transformer** takes the guided and the unguided pass as a batch of two: IndicF5's unguided pass is the same
-  call with the reference mel zeroed and every token set to the filler (`-1`), so the graph needs no flags.
-- **BigVGAN's** anti-aliasing filters expand their kernels at run time, which ONNX can't size; they are stored
-  pre-expanded (`fixed_filters` in `nandini/onnx/make.py`), with the same output to the sample.
-- **vocos is not Nandinī's voice.** Vāgdhenu's renderer redoes a line when vocos's output is quiet, and that test needs
-  vocos's output, so it is included for the test only. Its inverse STFT doesn't export, so the graph stops at the
-  spectrum and numpy does the rest.
+In the PyTorch environment, with onnx and onnxruntime added:
 
 ```bash
 uv pip install --python external/train-env/bin/python onnx==1.23.2 onnxruntime==1.23.2
 nandini onnx make --ema training/run/ema/ema_14800.pt --vocoder training/vocoder/run/vocoder.pt   # -> training/onnx/
-nandini onnx check graphs --ema ... --vocoder ... --bank training/female_bank   # each graph against torch
-nandini onnx check verses --ema ... --vocoder ... --bank training/female_bank   # 5 test verses, torch and ONNX
-nandini onnx check score                                                        # length and Su-śrotā's errors
+nandini onnx small --ema training/run/ema/ema_14800.pt    # the compact files, with weights stored as int8
+nandini onnx check verses --ema ... --vocoder ... --bank training/female_bank
+nandini onnx check score
 ```
-
-To render without PyTorch, in an environment of its own (`third_party/onnx-requirements.txt`):
-
-```bash
-uv venv external/onnx-env --python 3.10 && uv pip install --python external/onnx-env/bin/python -r third_party/onnx-requirements.txt -e . --no-deps
-external/onnx-env/bin/nandini onnx render --bank training/female_bank --text "वसुदेवसुतं देवं कंसचाणूरमर्दनम्" --out out.wav
-```
-
-**Checked against torch** (MacBook Air M2, CPU):
-
-| Check | Bar | Result |
-|:--|:--|:--|
-| Each graph, the same real inputs (a bank reference, a verse's tokens, fixed noise) | largest difference ≤ 1e-4 of the output's range | transformer at most 5.0e-5 (t = 0, 0.3, 0.9); BigVGAN 1.1e-5; vocos with the numpy inverse STFT 6.9e-6 |
-| 5 test verses, Vāgdhenu's torch renderer and the ONNX renderer from the same noise | the same length to the sample; Su-śrotā's character errors within 1 per verse | all 5 the same length; errors identical on all 5; mean log-mel difference 0.006 to 0.008 nats |
-
-On the CPU of a MacBook Air M2, a 9 to 12 s verse takes about 6 to 10 minutes at 64 steps, like the torch renderer on
-the same CPU.
-
-**Smaller files.** `nandini onnx small --ema ...` writes, beside the fp32 files: the transformer with its weights stored
-as int8 (one scale per output column, arithmetic still float), the same with AdaLN factorised to rank 32 (one shared
-projection of the time embedding, then a 32-wide matrix per block, after Hemanth's browser version of Vāgdhenu,
-[gnumanth/sanskrit-tts-onnx](https://huggingface.co/gnumanth/sanskrit-tts-onnx), MIT), and BigVGAN stored as fp16 or
-int8. `nandini onnx check small` renders the check verses with every combination from the same noise, and
-`check score-small` compares each with the fp32 render.
-
-| Transformer + vocoder | MB | Mean log-mel difference from fp32 (frame by frame / time-averaged) | Su-śrotā errors, 5 verses |
-|:--|--:|:--|:--|
-| fp32 + fp32 | 1,809.5 | — | 16 |
-| fp32 + int8 | 1,472.7 | 0.047 / 0.011 | 16, identical per verse |
-| int8 + int8 | 480.1 | 0.734 / 0.054 | 17 |
-| rank-32 int8 + int8 | 344.0 | 0.744 / 0.055 | 18 |
-| fp32 + fp32 with another seed (61) | 1,809.5 | 1.654 / 0.134 | 13 |
-
-Add 54.2 MB for `vocos_spectrum.onnx`, which the renderer uses for the retry test. The int8 vocoder reproduces the fp32
-render closely. The compressed transformers give different renders, as a different seed does, but each is about half
-as far from the fp32 render as another seed of the fp32 files is. They missed the bars set before the run (Su-śrotā's
-errors within 1 per verse, and 0.09 nats frame by frame, which turned out stricter than two seeds of the fp32 files),
-so the fp32 transformer is the reference and the compact ones are offered as measured above. On five verses.
-
-## Comparing with Vāgdhenu
-
-Nandinī (N) against Vāgdhenu's own models: V (`voice_armA`, trained like N) and Vs (`voice_steer`, what his website
-serves). Every system runs through his website's path, his renderer unchanged: the verse text as given, his meter
-detection and fallback, `render_one(text, meter, seed=60)` with his defaults. Only the model, reference bank and vocoder
-file differ (V and Vs: his; N: ours).
-
-```bash
-nandini compare render --system N --ema EMA --bank BANK_DIR --vocoder VOCODER   # training environment
-nandini compare render --system V
-nandini compare render --system Vs
-nandini compare score                                                          # this environment (Su-śrotā)
-```
-
-| Set | Verses | Systems | Compared against |
-|:--|:--|:--|:--|
-| A | the 61 pitch-shift verses (training verses) | N, V, Vs | Vāgdhenu's recording of each |
-| B | the 60 [test verses](#test-verses) | N, V, Vs | V's render (the main test, below) |
-| C | his 6 demo verses (`docs/index.html`) | Vs | his demo MP3s: do we run his system as he does? |
-
-
-- **Main test, set B (N against V), fixed before rendering:** mean character errors at most V's + 2.0 points; mean melody correlation
-  with V's render at least 0.8; mean duration ratio within 1 ± 0.10.
-- **Melody correlation:** pitch curves (pYIN, 70–500 Hz) in semitones around each curve's own median, aligned by DTW
-  on MFCCs, Pearson r over frames voiced in both.
-- **Voice, every system (no pass/fail):** speaker cosine to her training clips, the lowest 2 s window's cosine (a voice
-  switch), median F0, and the pitch offset N − V per verse against the dataset's shift k.
-- Sets are reported separately in `compare/report.md`; per render in `scores.csv`, per pair in `pairs.csv`.
-
-## Test verses
-
-`manifests/test_verses.csv` holds 60 verses for evaluating a chant model on text it never saw. They are in the dataset's
-meters but outside it, and anyone may reuse them as data.
-
-```bash
-nandini fetch dcs     # the Digital Corpus of Sanskrit, only the two works used, at a pinned commit
-nandini test-verses    # rebuilds manifests/test_verses*.csv (training environment)
-```
-
-- **Source:** the [Digital Corpus of Sanskrit](https://github.com/OliverHellwig/sanskrit) (Oliver Hellwig, CC BY 4.0):
-  the Bhāgavata Purāṇa and the Mukundamālā, devotional verse close to the dataset's.
-- **Text:** printed as the dataset prints its text (Devanagari, words joined at consonant ends, avagraha joined, no
-  daṇḍas); the DCS reading in IAST and its sentence ids are kept beside it.
-- **Kept:** Vāgdhenu's meter detector recognises the meter; no half-verse appears in any dataset verse (letters,
-  spelling normalised); every character is in Vāgdhenu's vocabulary; the length is within the dataset's range.
-- **Drawn:** 60, split by the dataset's meter-family shares over the families the source offers, seed 20261117.
-  Mālinī, sragdharā, rucirā and the dataset's "other" have no recognised verse in these works and aren't covered.
-
-## Settings
-
-Every setting is in `nandini/config.py`, with a comment on each:
-- the pinned dataset and model revisions; diffusion steps (30) and guidance (0.7);
-- at most 10 candidates per verse, their seeds (seed step 1000), and at most 1 error to stop;
-- k per style (+6.74 semitones for style_a, +6.58 for style_b; each is the gap between Vāgdhenu's mean log pitch and
-  the female voice's own reading of the same verses);
-- the WORLD frame step and pitch range, and the energy boost cap (6 dB);
-- the voice sample and the voice-consistency window.
-
-`nandini config` prints them, and every `nandini generate` run writes them to `out/settings_part*.json`.
-**Changing any setting means the results no longer match the released audio.**
 
 ## Tests
 
 ```bash
-uv sync --group test
-uv run pytest
+uv sync --group test && uv run pytest      # about 6 s, offline, no models
 ```
 
-About 6 seconds, offline, with no models loaded. They check that:
-- the settings are the release's, and `nandini config` prints every one;
-- the manifests have their fixed indices, and the sample keeps the full run's;
-- every verse's syllable count fits its meter;
-- error marking flags a changed or dropped syllable, and nothing on an exact transcript;
-- the melody step lands on Vāgdhenu's pitch + k at −20 dBFS without clipping;
-- the command's defaults and argument checks work;
-- `nandini tables`, `report` and `listen build` work on a small synthetic run folder;
-- the selection rule stops and keeps as it should, and the pitch shift's draw allocation and helpers are right;
-- `nandini fetch` checks out the pinned commit and refuses another, and `external/` is gitignored;
-- the training length and schedule (14,800 steps; 600 epochs end at 29,400 on these clips), and every kept step is
-  one the trainer saves;
-- the training commands say what to make when the training environment is missing;
-- the check verses are the seed-20261109 draw, and a bank cut keeps the syllables that start inside it.
+## Repository layout
 
-A full check needs the models and Seed-VC: `nandini generate --indices 389 --out check ...` should keep candidate 0 with 1 error, as in the released run. On the same machine and environment the audio is identical sample for sample; across GPUs, conversions can differ slightly.
-
-## The voice sample
-
-The female voice comes from one 25 s clip, `voice/female_voice_sample.wav`, which sets the voice the converter aims
-for (`--voice` replaces it). It was generated with [Indic-Speak](https://huggingface.co/bodhan-ai/indic-speak)
-(revision `76e0814`, speaker Bharati), under the Bodhan AI Open Model License (see [Licences](#licences)).
+| Path | What it is |
+| :-- | :-- |
+| `nandini/` | the code: one command, `nandini`, with every setting the release used in `nandini/config.py` (`nandini config` prints them) |
+| `manifests/` | clip lists, the released kept list, the 60 test verses |
+| `voice/` | the 25 s sample that sets the female voice |
+| `scripts/` | one setup script per environment |
+| `third_party/` | pinned requirements for each environment, and a Seed-VC patch for Apple silicon |
+| `tests/` | quick offline checks (`pytest`) |
+| `docs/` | the dataset diagram |
+| `external/` | not in the repo: outside code fetched by `nandini fetch`, and the environments |
 
 ## Licences
 
@@ -639,7 +156,9 @@ The code is licensed under the [Apache License 2.0](LICENSE): use it, change it,
 as long as you keep the licence and the [NOTICE](NOTICE) file and say what you changed.
 
 Some parts carry their own terms (details in [NOTICE](NOTICE)):
-- **`voice/female_voice_sample.wav`** is output of [Indic-Speak](https://huggingface.co/bodhan-ai/indic-speak) and is
+
+- **`voice/female_voice_sample.wav`** is output of [Indic-Speak](https://huggingface.co/bodhan-ai/indic-speak)
+  (revision `76e0814`, speaker Bharati) and is
   under the Bodhan AI Open Model License: keep its credit, and its acceptable-use restrictions apply to whatever you
   make with it.
 - **`third_party/seed-vc-mps-float32.patch`** modifies Seed-VC and is GPL-3.0.

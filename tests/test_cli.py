@@ -55,3 +55,20 @@ def test_check_commands_parse(monkeypatch):
     cli.main(["trend-check", "score", "--before", "12000"])
     assert seen == {"what": "trend", "step": "score", "out": str(cli.C.ROOT / "training/checks/trend")}
 
+
+
+def test_chant(tmp_path, monkeypatch):
+    """`nandini chant` needs a verse, defaults to PyTorch with his website's seed, downloads only the files its backend
+    needs, and says which setup script to run when the backend's environment is missing."""
+    from nandini import chant
+    with pytest.raises(SystemExit, match="--text is required"):
+        cli.main(["chant"])
+    asked = {}
+    monkeypatch.setattr(chant, "prepare", lambda a: asked.update(a=a))
+    monkeypatch.setattr(chant, "_here", lambda backend: False)
+    monkeypatch.setitem(chant.ENVS, "onnx", tmp_path / "none" / "python")
+    with pytest.raises(SystemExit, match="scripts/setup_onnx.sh"):
+        cli.main(["chant", "--backend", "onnx", "--compact", "--text", "x", "--model", str(tmp_path)])
+    assert asked["a"].compact and asked["a"].seed == C.WEB_SEED == 60
+    assert chant.FILES["torch"] == [chant.VOICE, chant.VOCODER] and chant.FILES["onnx"] == ["onnx/*"]
+    assert C.MODEL_REPO == "ramgathreya/nandini" and len(C.MODEL_REV) == 40
