@@ -14,7 +14,7 @@ short_description: Sanskrit verse to chant, in Nandinī's female voice or beside
 # Nandinī — Sanskrit chant in a female voice (demo)
 
 Paste a Sanskrit verse in any Indian script and hear it chanted by [Nandinī](https://huggingface.co/ramgathreya/nandini),
-by [Vāgdhenu](https://huggingface.co/prathoshap/vagdhenu), or by both side by side. Both run through Vāgdhenu's own
+or by Nandinī and [Vāgdhenu](https://huggingface.co/prathoshap/vagdhenu) side by side. Both run through Vāgdhenu's own
 renderer with his website's settings; only the voice, the vocoder and the reference bank differ.
 
 ## Deploying
@@ -25,11 +25,11 @@ This folder is the whole Space. Nothing else from the Nandinī repository is nee
 huggingface-cli upload <user>/nandini-demo . --repo-type space
 ```
 
-- **Hardware:** ZeroGPU (the app takes a GPU only while a verse renders). Any GPU Space, or a machine with a GPU, also
-  works with `python app.py`. On a CPU a verse takes several minutes.
+- **Hardware:** ZeroGPU (the app takes a GPU only while a verse renders). Without PRO, create the Space on free CPU
+  and request a community GPU grant for ZeroGPU in its Settings. Any GPU Space, or a machine with a GPU, also works
+  with `python app.py`. On a CPU a verse takes many minutes.
 - **First start** clones Vāgdhenu's code and NVIDIA's BigVGAN at pinned commits into `_external/`, then downloads both
   models from Hugging Face at pinned revisions.
-- **While `ramgathreya/nandini` is private,** add an `HF_TOKEN` secret that can read it.
 - **Limits** are Vāgdhenu's own (`limits.py` in his code): one verse per request and 10 chants per visitor per day.
 
 ## Running locally

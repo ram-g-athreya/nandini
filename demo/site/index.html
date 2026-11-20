@@ -160,8 +160,8 @@
       <div class="offline" id="offline">The live demo is resting right now.
         Meanwhile, <a href="#listen">listen to the sample chants</a> below.</div>
     </div>
-    <p class="note">The first chant takes a minute or two while the voice warms up. You can hear Nandinī, Vāgdhenu, or
-      both side by side. If the demo doesn't load, open it <a id="demolink" target="_blank" rel="noopener">in its own tab&nbsp;↗</a>.</p>
+    <p class="note">The first chant takes a minute or two while the voice warms up. You can also hear Nandinī and
+      Vāgdhenu side by side. If the demo doesn't load, open it <a id="demolink" target="_blank" rel="noopener">in its own tab&nbsp;↗</a>.</p>
   </section>
 
   <section id="listen">
@@ -377,8 +377,8 @@
 <script>
 (function(){
   // The live demo: a Hugging Face Space (demo/space in the repository). Change SPACE if it is hosted elsewhere.
-  // The page asks Hugging Face whether the Space exists and is up (a sleeping Space wakes when the frame loads);
-  // otherwise it shows a note instead of an error page.
+  // The page asks Hugging Face whether the Space exists, is up and has a GPU (a sleeping Space wakes when the frame
+  // loads); otherwise it shows a note instead of an error page.
   var SPACE = "ramgathreya/nandini-demo";
   var DEMO = "https://" + SPACE.replace("/", "-").replace(/[._]/g, "-").toLowerCase() + ".hf.space/?__theme=light";
   var frame = document.getElementById("demoframe");
@@ -388,7 +388,10 @@
     .then(function(r){ return r.ok ? r.json() : null; })
     .then(function(d){
       var stage = d && d.runtime && d.runtime.stage;
-      if (stage && !/ERROR|NO_APP_FILE|CONFIG_ERROR|PAUSED|STOPPED|DELETING/.test(stage)) frame.src = DEMO; else down();
+      var hw = (d && d.runtime && d.runtime.hardware && d.runtime.hardware.current) || "";
+      // only a Space with a GPU: on a CPU one verse takes many minutes
+      if (stage && !/ERROR|NO_APP_FILE|CONFIG_ERROR|PAUSED|STOPPED|DELETING/.test(stage) && hw && !/^cpu/.test(hw))
+        frame.src = DEMO; else down();
     })
     .catch(down);
   // Seekable players: each clip is downloaded whole and played from memory (a blob URL), so the player can seek

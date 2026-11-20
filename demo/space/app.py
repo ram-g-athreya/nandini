@@ -1,7 +1,7 @@
 """Nandinī — Sanskrit chant in a female voice, beside Vāgdhenu's (a Gradio app for a Hugging Face Space).
 
-Chants a verse with Nandinī (ramgathreya/nandini), with Vāgdhenu (prathoshap/vagdhenu, the model his website serves),
-or with both side by side. Both go through Vāgdhenu's own renderer, unchanged: his text handling (any Indic script,
+Chants a verse with Nandinī (ramgathreya/nandini), or with Nandinī and Vāgdhenu (prathoshap/vagdhenu, the model his
+website serves) side by side, to compare. Both go through Vāgdhenu's own renderer, unchanged: his text handling (any Indic script,
 Kannada routing, meter detection) and his website's settings. Only the voice, the vocoder and the reference bank differ.
 
 Vāgdhenu's code and NVIDIA's BigVGAN are cloned at pinned commits on first start, never copied here; the weights
@@ -9,7 +9,7 @@ download from Hugging Face at pinned revisions. On a ZeroGPU Space the GPU is ta
 
 Local run (a CUDA GPU, Apple silicon or the CPU):
     pip install -r requirements.txt gradio==5.49.1 && python app.py
-Set VAGDHENU_SRC to an existing checkout's src/ to skip the clone, and HF_TOKEN while the model repo is private.
+Set VAGDHENU_SRC to an existing checkout's src/ to skip the clone.
 """
 import json
 import os
@@ -84,7 +84,8 @@ for _k, _v in _bank.items():
 AUTO = "__auto__"
 METER_CHOICES = [("Auto-detect (recommended)", AUTO)] + [(m, m) for m in METERS]
 
-NANDINI, VAGDHENU, BOTH = "Nandinī (female)", "Vāgdhenu (male)", "Both, side by side"
+NANDINI, BOTH = "Nandinī", "Nandinī and Vāgdhenu, side by side"
+VAGDHENU = "Vāgdhenu"  # not offered on its own: his own Space chants in his voice
 
 # Sample verses, each complete so the meter can be detected: (label, verse, meter). His detector misses
 # drutavilambita and mālinī, so those two give their meter.
@@ -161,7 +162,7 @@ def _render_both(text, meter, seed):
 def chant(text, voice, meter_choice, seed, request: gr.Request):
     text = (text or "").strip()
     if not text:
-        raise gr.Error("Please paste a verse first.")
+        raise gr.Error("Please paste a verse first 🙏")
     msg = limits.validate_one_shloka(text)
     if msg:
         raise gr.Error(msg)
@@ -171,66 +172,87 @@ def chant(text, voice, meter_choice, seed, request: gr.Request):
     try:
         if voice == BOTH:
             n, v = _render_both(text, meter, seed)
-        elif voice == NANDINI:
-            n, v = _render_one(NANDINI, text, meter, seed), None
         else:
-            n, v = None, _render_one(VAGDHENU, text, meter, seed)
+            n, v = _render_one(NANDINI, text, meter, seed), None
     except Exception as e:
         raise gr.Error(f"Sorry, rendering failed: {e}")
     return n, v, status
 
 
 def _show(voice):
-    return gr.update(visible=voice != VAGDHENU), gr.update(visible=voice != NANDINI)
+    return gr.update(visible=voice == BOTH)
 
 
 INTRO = """\
-# Nandinī — Sanskrit chant in a female voice
-Paste a Sanskrit verse and press **Chant**. Nandinī gives [Vāgdhenu](https://prathosh.in/vagdhenu/), a
-meter-aware chant synthesiser, a female voice. It was built from Vāgdhenu's own recordings, voice-converted, with
-no new recordings. Choose **Both** to hear the same verse in Vāgdhenu's voice beside it.
+# 🪷 Nandinī — Sanskrit chant in a female voice
+Turn a **Sanskrit verse into traditional chant**. Paste a verse and press **Chant it**.
 
-- Any Indian script works (Devanagari, Kannada, Telugu, Malayalam, …), and the **meter is detected** for you.
+- Works with **any Indian script**: Devanagari, Kannada, Telugu, Malayalam and more. It's detected automatically.
+- The **meter is detected for you**. (You can set it yourself under *Advanced*.)
+- Choose **side by side** to hear [Vāgdhenu](https://prathosh.in/vagdhenu/)'s male voice chant it too.
 - Put each line or half-verse on its own line, or separate them with `।` and `॥`.
-- For classical (non-Vedic) verse, without accent marks.
 """
 
 FOOTER = """\
 ---
-The first chant takes a minute or two while the models load; later ones are quicker. Both voices chant through
-Vāgdhenu's renderer with his website's settings; only the voice, vocoder and reference bank differ.
+The first chant takes a minute or so while the voice loads; after that it's quicker.
+For classical (non-Vedic) verse only; please remove accent marks first.
 
-Nandinī: [model](https://huggingface.co/ramgathreya/nandini) ·
-[dataset](https://huggingface.co/datasets/ramgathreya/nandini-data) ·
-[code](https://github.com/ram-g-athreya/nandini). Vāgdhenu by Prof. Prathosh A P, IISc Bengaluru:
-[website](https://prathosh.in/vagdhenu/) · [code](https://github.com/prathoshap/vagdhenu) ·
-[model](https://huggingface.co/prathoshap/vagdhenu).
+Nandinī is built on **Vāgdhenu** by Prof. Prathosh A P, Indian Institute of Science, Bengaluru
+([website](https://prathosh.in/vagdhenu/) · [code](https://github.com/prathoshap/vagdhenu)), and chants through
+Vāgdhenu's own system. Nandinī: [website](https://ram-g-athreya.github.io/nandini/) ·
+[code](https://github.com/ram-g-athreya/nandini) · [weights](https://huggingface.co/ramgathreya/nandini) ·
+[dataset](https://huggingface.co/datasets/ramgathreya/nandini-data).
 Nandinī's voice comes from a sample made with [Indic-Speak](https://huggingface.co/bodhan-ai/indic-speak) (Bodhan AI
-Open Model License): no voice clones of real people without consent, no robocalls or voice phishing.
+Open Model License): no voice clones of real people without their consent, and no robocalls or voice phishing.
 """
 
-with gr.Blocks(title="Nandinī — Sanskrit chant", theme=gr.themes.Soft()) as demo:
-    gr.Markdown(INTRO)
+# The website's colours: plum for Nandinī (and the page), warm gold as the second colour
+PLUM = gr.themes.Color(c50="#fdf2f6", c100="#fbe6ee", c200="#f3cddc", c300="#e6a6c0", c400="#cf7099",
+                       c500="#b04477", c600="#9b2d5c", c700="#82244d", c800="#6e1d41", c900="#5a1836", c950="#3a0d22",
+                       name="plum")
+# The website's fonts: Spectral, with Noto Serif Devanagari for the verses (Spectral has no Devanagari)
+THEME = gr.themes.Soft(primary_hue=PLUM, secondary_hue="amber", neutral_hue="stone", text_size=gr.themes.sizes.text_lg,
+                       font=[gr.themes.GoogleFont("Spectral"), gr.themes.GoogleFont("Noto Serif Devanagari"),
+                             "Georgia", "serif"]).set(
+    button_primary_background_fill="#9b2d5c", button_primary_background_fill_hover="#6e1d41",
+    button_primary_text_color="#ffffff", body_background_fill="#fdf9fa",
+    link_text_color="#9b2d5c", link_text_color_hover="#6e1d41", link_text_color_visited="#9b2d5c")
+CSS = """
+.gradio-container {max-width: 1100px !important}
+#intro h1 {font-weight: 700; color: #6e1d41; letter-spacing: -0.01em}
+#verse textarea {font-family: 'Noto Serif Devanagari', 'Spectral', serif; font-size: 1.15rem; line-height: 1.9}
+.gallery {font-family: 'Spectral', 'Noto Serif Devanagari', serif}
+#chant-btn {font-size: 1.15rem; font-weight: 600}
+#advanced .label-wrap .icon {font-size: 0.7rem; color: #8c7b84}  /* the open/close arrow: smaller, as in Vāgdhenu's app */
+#samples > .label {display: none}  /* the examples' empty label still shows a list icon */
+"""
+
+with gr.Blocks(title="Nandinī — Sanskrit chant", theme=THEME, css=CSS) as demo:
+    gr.Markdown(INTRO, elem_id="intro")
     with gr.Row():
         with gr.Column(scale=3):
-            txt = gr.Textbox(label="Your verse (one at a time)", value=SAMPLES[0][1], lines=4,
-                             placeholder="Paste one Sanskrit verse in any Indian script…")
-            voice = gr.Radio([NANDINI, BOTH, VAGDHENU], value=NANDINI, label="Voice")
-            with gr.Accordion("Advanced (optional)", open=False):
+            txt = gr.Textbox(label="Your verse — one shloka at a time", value=SAMPLES[0][1], lines=4, elem_id="verse",
+                             placeholder="Paste a single Sanskrit verse in any Indian script…")
+            gr.Markdown(f"<sub>One shloka per chant · up to {limits.DAILY_LIMIT} chants per day.</sub>")
+            voice = gr.Radio([NANDINI, BOTH], value=NANDINI, label="Voice")
+            with gr.Accordion("⚙️ Advanced (optional)", open=False, elem_id="advanced"):
                 meter = gr.Dropdown(METER_CHOICES, value=AUTO, label="Meter (chandas)",
-                                    info="Leave on auto-detect unless you know the meter.")
+                                    info="Leave on Auto-detect unless you know the meter.")
                 seed = gr.Slider(0, 1000, value=SEED, step=1, label="Seed",
                                  info="Change it for a different take of the same verse.")
-            btn = gr.Button("Chant", variant="primary", size="lg")
-            gr.Markdown(f"<sub>One verse per chant · up to {limits.DAILY_LIMIT} chants per day.</sub>")
+            btn = gr.Button("🎧 Chant it", variant="primary", size="lg", elem_id="chant-btn")
         with gr.Column(scale=2):
-            out_n = gr.Audio(label="Nandinī", type="numpy")
-            out_v = gr.Audio(label="Vāgdhenu", type="numpy", visible=False)
+            out_n = gr.Audio(label="Nandinī", type="numpy", autoplay=False)
+            out_v = gr.Audio(label="Vāgdhenu", type="numpy", autoplay=False, visible=False)
             status = gr.Markdown("")
-    voice.change(_show, voice, [out_n, out_v])
+    voice.change(_show, voice, out_v)
     btn.click(chant, [txt, voice, meter, seed], [out_n, out_v, status])
-    gr.Markdown("### Sample verses: click one to load it, then press **Chant**")
-    gr.Examples([[t, m] for _, t, m in SAMPLES], [txt, meter], example_labels=[n for n, _, _ in SAMPLES], label="")
+    gr.Markdown("### 📜 Sample shlokas — click one to load it, then press **Chant it**\n"
+                "Or pick any verse from the **[Bhagavad Gītā](https://sanskritdocuments.org/doc_giitaa/bhagvadnew.html)** "
+                "and paste it above.")
+    gr.Examples([[t, m] for _, t, m in SAMPLES], [txt, meter], example_labels=[n for n, _, _ in SAMPLES], label="",
+                elem_id="samples")
     gr.Markdown(FOOTER)
 
 if __name__ == "__main__":
