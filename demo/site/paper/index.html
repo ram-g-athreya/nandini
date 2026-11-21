@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nandini: A Female Voice for Vagdhenu, a Vrtta (Meter) Aware Sloka-to-Chant (TTS) System for Sanskrit</title>
+<meta name="description" content="Nandinī, a female chanting voice for Vāgdhenu, built only from Vāgdhenu's released data. Paper, PDF and citation.">
+
+<!-- Google Scholar (Highwire Press tags): https://scholar.google.com/intl/en/scholar/inclusion.html#indexing -->
+<meta name="citation_title" content="Nandini: A Female Voice for Vagdhenu, a Vrtta (Meter) Aware Sloka-to-Chant (TTS) System for Sanskrit">
+<meta name="citation_author" content="Athreya, Ram G">
+<meta name="citation_publication_date" content="2026/11/21">
+<meta name="citation_online_date" content="2026/11/21">
+<meta name="citation_language" content="en">
+<meta name="citation_pdf_url" content="https://ram-g-athreya.github.io/nandini/paper/nandini.pdf">
+<meta name="citation_abstract_html_url" content="https://ram-g-athreya.github.io/nandini/paper/">
+<meta name="citation_keywords" content="Sanskrit; text-to-speech; chant synthesis; voice conversion; meter; Indic speech">
+<meta name="citation_reference" content="citation_title=Vāgdhenu: A Vṛtta (Meter) Aware Śloka-to-Chant (TTS) System for Sanskrit; citation_author=Prathosh, A. P.; citation_publication_date=2026; citation_arxiv_id=2608.26146">
+
+<!-- Dublin Core, for other indexers -->
+<meta name="DC.title" content="Nandini: A Female Voice for Vagdhenu, a Vrtta (Meter) Aware Sloka-to-Chant (TTS) System for Sanskrit">
+<meta name="DC.creator" content="Athreya, Ram G">
+<meta name="DC.date" content="2026-11-21">
+<meta name="DC.type" content="Text.Preprint">
+
+<link rel="canonical" href="https://ram-g-athreya.github.io/nandini/paper/">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  :root{--ink:#2b1f26;--soft:#6b5a63;--muted:#8c7b84;--accent:#9b2d5c;--deep:#6e1d41;--line:#eddfe5;--bg:#fdf9fa;--tint:#fbeef3}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:'Spectral',Georgia,serif;font-size:18px;line-height:1.65;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:780px;margin:0 auto;padding:2.6rem 1rem 3rem}
+  a{color:var(--accent);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .back{font-size:.95rem}
+  h1{font-size:1.85rem;line-height:1.25;color:var(--deep);margin:1.2rem 0 .6rem;font-weight:700}
+  .meta{color:var(--soft);margin:0 0 1.2rem}
+  .pills{display:flex;flex-wrap:wrap;gap:.5rem;margin:0 0 1.8rem}
+  .pill{display:inline-block;padding:.42rem .95rem;border:1px solid #e3c4d2;border-radius:999px;background:#fff;color:var(--deep);font-size:.95rem;font-weight:600}
+  .pill.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+  .pill:hover{text-decoration:none;border-color:var(--accent)}
+  h2{font-size:1.2rem;color:var(--deep);margin:1.8rem 0 .5rem}
+  pre{background:var(--tint);border:1px solid var(--line);border-radius:10px;padding:.9rem 1rem;font-size:.82rem;line-height:1.5;overflow-x:auto;white-space:pre}
+  footer{margin-top:2.5rem;padding-top:1rem;border-top:1px solid var(--line);color:var(--muted);font-size:.9rem}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <a class="back" href="../">← Nandinī demo</a>
+  <h1>Nandini: A Female Voice for Vagdhenu, a Vrtta (Meter) Aware Sloka-to-Chant (TTS) System for Sanskrit</h1>
+  <p class="meta">Ram G Athreya · Independent Researcher · November 2026</p>
+  <div class="pills">
+    <a class="pill primary" href="nandini.pdf">PDF</a>
+    <a class="pill" href="https://www.alphaxiv.org/abs/2611.nandini-sanskrit-chant-synthesis" target="_blank" rel="noopener">alphaXiv</a>
+    <a class="pill" href="https://github.com/ram-g-athreya/nandini" target="_blank" rel="noopener">Code</a>
+    <a class="pill" href="https://huggingface.co/ramgathreya/nandini" target="_blank" rel="noopener">Model</a>
+    <a class="pill" href="https://huggingface.co/datasets/ramgathreya/nandini-data" target="_blank" rel="noopener">Dataset</a>
+  </div>
+
+  <h2>Abstract</h2>
+  <p>We present Nandinī, a female chanting voice for Vāgdhenu. Vāgdhenu turns a Sanskrit verse into chant that follows its meter, in the voice of a single male reciter. A female voice would normally need recordings of a trained female reciter, but Nandinī is built only from Vāgdhenu's released data. Each of its 1,467 recorded verses is converted into a voice taken from a single 25-second text-to-speech sample, and the reciter's melody is then put back in the new voice's range. Up to ten such candidates are made for each verse, and the first in which a chant recogniser finds at most one syllable wrong is kept. By that recogniser's count, 1,298 of the 1,467 clips (88.5%) meet this bar, which is optimistic because the same recogniser chose them. IndicF5 is then fine-tuned on the clips with Vāgdhenu's recipe, together with a vocoder for the new voice. On 60 verses new to both systems, Nandinī's character error rate is 3.81% against Vāgdhenu's 3.67%, and its chant is 4.5% longer. By ear, its tune matches Vāgdhenu's fully or mostly in 5 of 8 blind pairs. In the other 3 the melody is also similar, and only the pauses fall in different places. We release the dataset, the code and the model, including an ONNX version.</p>
+
+  <h2>Citation</h2>
+<pre>@misc{athreya2026nandini,
+  title     = {Nandini: A Female Voice for Vagdhenu, a Vrtta (Meter) Aware Sloka-to-Chant (TTS) System for Sanskrit},
+  author    = {Ram G Athreya},
+  year      = {2026},
+  publisher = {alphaXiv},
+  url       = {https://www.alphaxiv.org/abs/2611.nandini-sanskrit-chant-synthesis}
+}</pre>
+
+  <footer>Built on <a href="https://arxiv.org/abs/2608.26146" target="_blank" rel="noopener">Vāgdhenu</a> by A. P. Prathosh.</footer>
+</main>
+</body>
+</html>

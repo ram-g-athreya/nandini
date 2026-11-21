@@ -180,13 +180,11 @@ Some parts carry their own terms (details in [NOTICE](NOTICE)):
 
 If you use Nandinī, please cite the paper:
 
-> Ram G Athreya. _Nandinī: A Female Voice for Vāgdhenu, a Vṛtta (Meter) Aware Śloka-to-Chant (TTS) System for
-> Sanskrit._ alphaXiv, 2026. <https://www.alphaxiv.org/abs/2611.nandini-sanskrit-chant-synthesis>
+> Ram G Athreya. _Nandini: A Female Voice for Vagdhenu, a Vrtta (Meter) Aware Sloka-to-Chant (TTS) System for Sanskrit._ alphaXiv, 2026. <https://www.alphaxiv.org/abs/2611.nandini-sanskrit-chant-synthesis>
 
 ```bibtex
 @misc{athreya2026nandini,
-  title     = {Nandin{\={i}}: A Female Voice for V{\={a}}gdhenu, a V{\d{r}}tta (Meter) Aware
-               {\'{S}}loka-to-Chant (TTS) System for Sanskrit},
+  title     = {Nandini: A Female Voice for Vagdhenu, a Vrtta (Meter) Aware Sloka-to-Chant (TTS) System for Sanskrit},
   author    = {Ram G Athreya},
   year      = {2026},
   publisher = {alphaXiv},
