@@ -10,7 +10,8 @@ Nandinī is made in two parts:
    needs, the reference bank and the vocoder, are remade for the new voice. The result runs in Vāgdhenu's renderer
    unchanged.
 
-**[Website and live demo](https://ram-g-athreya.github.io/nandini/)** ·
+**[Paper](https://www.alphaxiv.org/abs/2611.nandini-sanskrit-chant-synthesis)** ·
+**[Website](https://ram-g-athreya.github.io/nandini/)** ·
 **[Model](https://huggingface.co/ramgathreya/nandini)** ·
 **[Dataset](https://huggingface.co/datasets/ramgathreya/nandini-data)**
 
@@ -144,17 +145,17 @@ uv sync --group test && uv run pytest      # about 6 s, offline, no models
 
 ## Repository layout
 
-| Path | What it is |
-| :-- | :-- |
-| `nandini/` | the code: one command, `nandini`, with every setting the release used in `nandini/config.py` (`nandini config` prints them) |
-| `manifests/` | clip lists, the released kept list, the 60 test verses |
-| `voice/` | the 25 s sample that sets the female voice |
-| `demo/` | the website and the live demo (a Gradio app for a Hugging Face Space) |
-| `scripts/` | one setup script per environment |
-| `third_party/` | pinned requirements for each environment, and a Seed-VC patch for Apple silicon |
-| `tests/` | quick offline checks (`pytest`) |
-| `docs/` | the dataset diagram |
-| `external/` | not in the repo: outside code fetched by `nandini fetch`, and the environments |
+| Path           | What it is                                                                                                                  |
+| :------------- | :-------------------------------------------------------------------------------------------------------------------------- |
+| `nandini/`     | the code: one command, `nandini`, with every setting the release used in `nandini/config.py` (`nandini config` prints them) |
+| `manifests/`   | clip lists, the released kept list, the 60 test verses                                                                      |
+| `voice/`       | the 25 s sample that sets the female voice                                                                                  |
+| `demo/`        | the website and the live demo (a Gradio app for a Hugging Face Space)                                                       |
+| `scripts/`     | one setup script per environment                                                                                            |
+| `third_party/` | pinned requirements for each environment, and a Seed-VC patch for Apple silicon                                             |
+| `tests/`       | quick offline checks (`pytest`)                                                                                             |
+| `docs/`        | the dataset diagram                                                                                                         |
+| `external/`    | not in the repo: outside code fetched by `nandini fetch`, and the environments                                              |
 
 ## Licences
 
@@ -174,3 +175,35 @@ Some parts carry their own terms (details in [NOTICE](NOTICE)):
 - **The models the code downloads** keep their own licences: IndicVoiceChanger and Seed-VC (GPL-3.0; Seed-VC runs as
   a separate program and is not included), SpeechBrain's ECAPA model (Apache-2.0), and Su-śrotā (no licence stated
   on its model card).
+
+## Citation
+
+If you use Nandinī, please cite the paper:
+
+> Ram G Athreya. _Nandinī: A Female Voice for Vāgdhenu, a Vṛtta (Meter) Aware Śloka-to-Chant (TTS) System for
+> Sanskrit._ alphaXiv, 2026. <https://www.alphaxiv.org/abs/2611.nandini-sanskrit-chant-synthesis>
+
+```bibtex
+@misc{athreya2026nandini,
+  title     = {Nandin{\={i}}: A Female Voice for V{\={a}}gdhenu, a V{\d{r}}tta (Meter) Aware
+               {\'{S}}loka-to-Chant (TTS) System for Sanskrit},
+  author    = {Ram G Athreya},
+  year      = {2026},
+  publisher = {alphaXiv},
+  url       = {https://www.alphaxiv.org/abs/2611.nandini-sanskrit-chant-synthesis}
+}
+```
+
+Nandinī is built on Vāgdhenu's data, recipe and renderer, so please cite Vāgdhenu too:
+
+> A. P. Prathosh. _Vāgdhenu: A Vṛtta (Meter) Aware Śloka-to-Chant (TTS) System for Sanskrit._ arXiv:2608.26146, 2026.
+
+```bibtex
+@misc{prathosh2026vagdhenu,
+  title         = {V{\={a}}gdhenu: A V{\d{r}}tta (Meter) Aware {\'{S}}loka-to-Chant ({TTS}) System for {S}anskrit},
+  author        = {Prathosh, A. P.},
+  year          = {2026},
+  eprint        = {2608.26146},
+  archivePrefix = {arXiv}
+}
+```
