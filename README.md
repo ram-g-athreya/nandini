@@ -198,7 +198,7 @@ Nandinī is built on Vāgdhenu's data, recipe and renderer, so please cite Vāgd
 
 ```bibtex
 @misc{prathosh2026vagdhenu,
-  title         = {Vagdhenu: A Vrutta (Meter) Aware Shloka-to-Chant ({TTS}) System for {S}anskrit},
+  title         = {Vagdhenu: A Vrutta (Meter) Aware Shloka-to-Chant (TTS) System for Sanskrit},
   author        = {Prathosh, A. P.},
   year          = {2026},
   eprint        = {2608.26146},
