@@ -194,11 +194,11 @@ If you use Nandinī, please cite the paper:
 
 Nandinī is built on Vāgdhenu's data, recipe and renderer, so please cite Vāgdhenu too:
 
-> A. P. Prathosh. _Vāgdhenu: A Vṛtta (Meter) Aware Śloka-to-Chant (TTS) System for Sanskrit._ arXiv:2608.26146, 2026.
+> A. P. Prathosh. _Vagdhenu: A Vrutta (Meter) Aware Shloka-to-Chant (TTS) System for Sanskrit._ arXiv:2608.26146, 2026.
 
 ```bibtex
 @misc{prathosh2026vagdhenu,
-  title         = {V{\={a}}gdhenu: A V{\d{r}}tta (Meter) Aware {\'{S}}loka-to-Chant ({TTS}) System for {S}anskrit},
+  title         = {Vagdhenu: A Vrutta (Meter) Aware Shloka-to-Chant ({TTS}) System for {S}anskrit},
   author        = {Prathosh, A. P.},
   year          = {2026},
   eprint        = {2608.26146},
