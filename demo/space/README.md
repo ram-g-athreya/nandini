@@ -25,9 +25,9 @@ This folder is the whole Space. Nothing else from the Nandinī repository is nee
 huggingface-cli upload <user>/nandini-demo . --repo-type space
 ```
 
-- **Hardware:** ZeroGPU (the app takes a GPU only while a verse renders). Without PRO, create the Space on free CPU
-  and request a community GPU grant for ZeroGPU in its Settings. Any GPU Space, or a machine with a GPU, also works
-  with `python app.py`. On a CPU a verse takes many minutes.
+- **Hardware:** ZeroGPU (the app takes a GPU only while a verse renders). A free account can host up to 2 ZeroGPU
+  Spaces if its email is verified and it is over 30 days old; PRO raises that to 10. Any GPU Space, or a machine with
+  a GPU, also works with `python app.py`. On a CPU a verse takes many minutes.
 - **First start** clones Vāgdhenu's code and NVIDIA's BigVGAN at pinned commits into `_external/`, then downloads both
   models from Hugging Face at pinned revisions.
 - **Limits** are Vāgdhenu's own (`limits.py` in his code): one verse per request and 10 chants per visitor per day.
