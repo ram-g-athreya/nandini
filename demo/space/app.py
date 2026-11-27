@@ -238,16 +238,35 @@ CSS = """
 #voice .wrap > label {flex: 1; justify-content: center}  /* the two voices share the full width */
 #samples > .label {display: none}  /* the examples' empty label still shows a list icon */
 """
+# Gradio rewrites the css above and drops @container rules, so these styles go into the page head as they are
+HEAD = """<style>
+/* Gradio's small download icon on each player, made a labelled button */
+.chant .download-link .icon-button {width: auto !important; height: auto !important; padding: 0.35rem 0.85rem !important;
+  gap: 0.4rem; border-radius: 999px !important; background: #9b2d5c !important; color: #fff !important;
+  box-shadow: 0 2px 6px -2px rgba(90, 24, 54, 0.45)}
+.chant .download-link .icon-button:hover {background: #6e1d41 !important}
+.chant .download-link .icon-button > div {width: 1.05rem !important; height: 1.05rem !important}
+.chant .download-link .icon-button::after {content: "Download"; font-size: 0.95rem; font-weight: 600; line-height: 1}
+.chant .icon-button-wrapper {background: transparent !important; box-shadow: none !important; border: 0 !important}
+/* a narrow player (side by side on a small screen) keeps the icon only, so the button never covers the name */
+.chant {container-type: inline-size}
+@container (max-width: 280px) {
+  .chant .download-link .icon-button {padding: 0.45rem !important}
+  .chant .download-link .icon-button::after {content: none}
+}
+</style>"""
 
-with gr.Blocks(title="Nandinī — Sanskrit chant", theme=THEME, css=CSS) as demo:
+with gr.Blocks(title="Nandinī — Sanskrit chant", theme=THEME, css=CSS, head=HEAD) as demo:
     gr.Markdown(INTRO, elem_id="intro")
     txt = gr.Textbox(label="Your verse — one shloka at a time", value=SAMPLES[0][1], lines=4, elem_id="verse",
                      placeholder="Paste a single Sanskrit verse in any Indian script…")
     gr.Markdown(f"<sub>One shloka per chant · up to {limits.DAILY_LIMIT} chants per day.</sub>")
     # Nandinī alone fills the row; side by side, the two players share it
     with gr.Row(equal_height=True):
-        out_n = gr.Audio(label="Nandinī", type="numpy", autoplay=False)
-        out_v = gr.Audio(label="Vāgdhenu", type="numpy", autoplay=False, visible=False)
+        # the download button is asked for: Gradio leaves it off a player that starts hidden
+        out_n = gr.Audio(label="Nandinī", type="numpy", autoplay=False, show_download_button=True, elem_classes="chant")
+        out_v = gr.Audio(label="Vāgdhenu", type="numpy", autoplay=False, visible=False, show_download_button=True,
+                         elem_classes="chant")
     status = gr.Markdown("")
     voice = gr.Radio([NANDINI, BOTH], value=NANDINI, label="Voice", elem_id="voice")
     with gr.Accordion("⚙️ Advanced (optional)", open=False, elem_id="advanced"):
