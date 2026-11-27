@@ -96,6 +96,12 @@
       box-shadow:0 1px 3px rgba(0,0,0,.3)}
   .seek:focus-visible{outline:2px solid var(--c);outline-offset:4px}
   .time{flex:none;font-size:.85rem;color:var(--soft);font-variant-numeric:tabular-nums;min-width:5.6em;text-align:right}
+  .dl{flex:none;display:grid;place-items:center;width:2rem;height:2rem;border-radius:50%;color:var(--c);text-decoration:none;
+    transition:background .15s ease}
+  .dl:hover{background:var(--tint)}
+  .player.v .dl:hover{background:var(--vtint)}
+  .dl:focus-visible{outline:2px solid var(--c);outline-offset:2px}
+  .dl svg{width:1rem;height:1rem;fill:currentColor}
   audio{display:none}
   /* syllables light up as they are chanted; a click on one plays from there */
   .clip{--c:var(--accent);--ct:var(--tint)}
@@ -189,6 +195,7 @@
             <button type="button" class="play" aria-label="Play"><svg class="i-play" viewBox="0 0 16 16"><path d="M4 2.5v11l9.5-5.5z"/></svg><svg class="i-pause" viewBox="0 0 16 16"><path d="M3.5 2.5h3v11h-3zM9.5 2.5h3v11h-3z"/></svg></button>
             <input class="seek" type="range" min="0" max="1000" value="0" step="1" aria-label="Position in the chant">
             <span class="time">0:00 / 0:00</span>
+            <a class="dl" href="audio/demo1_nandini.mp3" download aria-label="Download this chant" title="Download this chant"><svg viewBox="0 0 16 16"><path d="M7 1.5h2v7.1l2.6-2.6 1.4 1.4L8 12.4 3 7.4l1.4-1.4L7 8.6zM2.5 13h11v1.8h-11z"/></svg></a>
           </div>
           <audio preload="metadata" src="audio/demo1_nandini.mp3"></audio>
         </div>
@@ -205,6 +212,7 @@
             <button type="button" class="play" aria-label="Play"><svg class="i-play" viewBox="0 0 16 16"><path d="M4 2.5v11l9.5-5.5z"/></svg><svg class="i-pause" viewBox="0 0 16 16"><path d="M3.5 2.5h3v11h-3zM9.5 2.5h3v11h-3z"/></svg></button>
             <input class="seek" type="range" min="0" max="1000" value="0" step="1" aria-label="Position in the chant">
             <span class="time">0:00 / 0:00</span>
+            <a class="dl" href="audio/demo2_nandini.mp3" download aria-label="Download this chant" title="Download this chant"><svg viewBox="0 0 16 16"><path d="M7 1.5h2v7.1l2.6-2.6 1.4 1.4L8 12.4 3 7.4l1.4-1.4L7 8.6zM2.5 13h11v1.8h-11z"/></svg></a>
           </div>
           <audio preload="metadata" src="audio/demo2_nandini.mp3"></audio>
         </div>
@@ -221,6 +229,7 @@
             <button type="button" class="play" aria-label="Play"><svg class="i-play" viewBox="0 0 16 16"><path d="M4 2.5v11l9.5-5.5z"/></svg><svg class="i-pause" viewBox="0 0 16 16"><path d="M3.5 2.5h3v11h-3zM9.5 2.5h3v11h-3z"/></svg></button>
             <input class="seek" type="range" min="0" max="1000" value="0" step="1" aria-label="Position in the chant">
             <span class="time">0:00 / 0:00</span>
+            <a class="dl" href="audio/demo3_nandini.mp3" download aria-label="Download this chant" title="Download this chant"><svg viewBox="0 0 16 16"><path d="M7 1.5h2v7.1l2.6-2.6 1.4 1.4L8 12.4 3 7.4l1.4-1.4L7 8.6zM2.5 13h11v1.8h-11z"/></svg></a>
           </div>
           <audio preload="metadata" src="audio/demo3_nandini.mp3"></audio>
         </div>
@@ -237,6 +246,7 @@
             <button type="button" class="play" aria-label="Play"><svg class="i-play" viewBox="0 0 16 16"><path d="M4 2.5v11l9.5-5.5z"/></svg><svg class="i-pause" viewBox="0 0 16 16"><path d="M3.5 2.5h3v11h-3zM9.5 2.5h3v11h-3z"/></svg></button>
             <input class="seek" type="range" min="0" max="1000" value="0" step="1" aria-label="Position in the chant">
             <span class="time">0:00 / 0:00</span>
+            <a class="dl" href="audio/demo4_nandini.mp3" download aria-label="Download this chant" title="Download this chant"><svg viewBox="0 0 16 16"><path d="M7 1.5h2v7.1l2.6-2.6 1.4 1.4L8 12.4 3 7.4l1.4-1.4L7 8.6zM2.5 13h11v1.8h-11z"/></svg></a>
           </div>
           <audio preload="metadata" src="audio/demo4_nandini.mp3"></audio>
         </div>
@@ -253,6 +263,7 @@
             <button type="button" class="play" aria-label="Play"><svg class="i-play" viewBox="0 0 16 16"><path d="M4 2.5v11l9.5-5.5z"/></svg><svg class="i-pause" viewBox="0 0 16 16"><path d="M3.5 2.5h3v11h-3zM9.5 2.5h3v11h-3z"/></svg></button>
             <input class="seek" type="range" min="0" max="1000" value="0" step="1" aria-label="Position in the chant">
             <span class="time">0:00 / 0:00</span>
+            <a class="dl" href="audio/demo5_nandini.mp3" download aria-label="Download this chant" title="Download this chant"><svg viewBox="0 0 16 16"><path d="M7 1.5h2v7.1l2.6-2.6 1.4 1.4L8 12.4 3 7.4l1.4-1.4L7 8.6zM2.5 13h11v1.8h-11z"/></svg></a>
           </div>
           <audio preload="metadata" src="audio/demo5_nandini.mp3"></audio>
         </div>
@@ -269,6 +280,7 @@
             <button type="button" class="play" aria-label="Play"><svg class="i-play" viewBox="0 0 16 16"><path d="M4 2.5v11l9.5-5.5z"/></svg><svg class="i-pause" viewBox="0 0 16 16"><path d="M3.5 2.5h3v11h-3zM9.5 2.5h3v11h-3z"/></svg></button>
             <input class="seek" type="range" min="0" max="1000" value="0" step="1" aria-label="Position in the chant">
             <span class="time">0:00 / 0:00</span>
+            <a class="dl" href="audio/demo6_nandini.mp3" download aria-label="Download this chant" title="Download this chant"><svg viewBox="0 0 16 16"><path d="M7 1.5h2v7.1l2.6-2.6 1.4 1.4L8 12.4 3 7.4l1.4-1.4L7 8.6zM2.5 13h11v1.8h-11z"/></svg></a>
           </div>
           <audio preload="metadata" src="audio/demo6_nandini.mp3"></audio>
         </div>
@@ -285,6 +297,7 @@
             <button type="button" class="play" aria-label="Play"><svg class="i-play" viewBox="0 0 16 16"><path d="M4 2.5v11l9.5-5.5z"/></svg><svg class="i-pause" viewBox="0 0 16 16"><path d="M3.5 2.5h3v11h-3zM9.5 2.5h3v11h-3z"/></svg></button>
             <input class="seek" type="range" min="0" max="1000" value="0" step="1" aria-label="Position in the chant">
             <span class="time">0:00 / 0:00</span>
+            <a class="dl" href="audio/unseen39_nandini.mp3" download aria-label="Download this chant" title="Download this chant"><svg viewBox="0 0 16 16"><path d="M7 1.5h2v7.1l2.6-2.6 1.4 1.4L8 12.4 3 7.4l1.4-1.4L7 8.6zM2.5 13h11v1.8h-11z"/></svg></a>
           </div>
           <audio preload="metadata" src="audio/unseen39_nandini.mp3"></audio>
         </div>
@@ -301,6 +314,7 @@
             <button type="button" class="play" aria-label="Play"><svg class="i-play" viewBox="0 0 16 16"><path d="M4 2.5v11l9.5-5.5z"/></svg><svg class="i-pause" viewBox="0 0 16 16"><path d="M3.5 2.5h3v11h-3zM9.5 2.5h3v11h-3z"/></svg></button>
             <input class="seek" type="range" min="0" max="1000" value="0" step="1" aria-label="Position in the chant">
             <span class="time">0:00 / 0:00</span>
+            <a class="dl" href="audio/unseen47_nandini.mp3" download aria-label="Download this chant" title="Download this chant"><svg viewBox="0 0 16 16"><path d="M7 1.5h2v7.1l2.6-2.6 1.4 1.4L8 12.4 3 7.4l1.4-1.4L7 8.6zM2.5 13h11v1.8h-11z"/></svg></a>
           </div>
           <audio preload="metadata" src="audio/unseen47_nandini.mp3"></audio>
         </div>
@@ -317,6 +331,7 @@
             <button type="button" class="play" aria-label="Play"><svg class="i-play" viewBox="0 0 16 16"><path d="M4 2.5v11l9.5-5.5z"/></svg><svg class="i-pause" viewBox="0 0 16 16"><path d="M3.5 2.5h3v11h-3zM9.5 2.5h3v11h-3z"/></svg></button>
             <input class="seek" type="range" min="0" max="1000" value="0" step="1" aria-label="Position in the chant">
             <span class="time">0:00 / 0:00</span>
+            <a class="dl" href="audio/unseen21_nandini.mp3" download aria-label="Download this chant" title="Download this chant"><svg viewBox="0 0 16 16"><path d="M7 1.5h2v7.1l2.6-2.6 1.4 1.4L8 12.4 3 7.4l1.4-1.4L7 8.6zM2.5 13h11v1.8h-11z"/></svg></a>
           </div>
           <audio preload="metadata" src="audio/unseen21_nandini.mp3"></audio>
         </div>
@@ -333,6 +348,7 @@
             <button type="button" class="play" aria-label="Play"><svg class="i-play" viewBox="0 0 16 16"><path d="M4 2.5v11l9.5-5.5z"/></svg><svg class="i-pause" viewBox="0 0 16 16"><path d="M3.5 2.5h3v11h-3zM9.5 2.5h3v11h-3z"/></svg></button>
             <input class="seek" type="range" min="0" max="1000" value="0" step="1" aria-label="Position in the chant">
             <span class="time">0:00 / 0:00</span>
+            <a class="dl" href="audio/unseen57_nandini.mp3" download aria-label="Download this chant" title="Download this chant"><svg viewBox="0 0 16 16"><path d="M7 1.5h2v7.1l2.6-2.6 1.4 1.4L8 12.4 3 7.4l1.4-1.4L7 8.6zM2.5 13h11v1.8h-11z"/></svg></a>
           </div>
           <audio preload="metadata" src="audio/unseen57_nandini.mp3"></audio>
         </div>
@@ -455,6 +471,7 @@
         c.classList.toggle("v", b.dataset.voice === "v");
         audio.pause();
         audio.dataset.want = b.dataset.src;
+        c.querySelector(".dl").href = b.dataset.src;  // the download button gets the voice now playing
         show(audio, b.dataset.src, playing);
       });
     });
